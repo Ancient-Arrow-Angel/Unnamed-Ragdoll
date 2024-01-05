@@ -7,6 +7,8 @@ TagManager:
   - Grab
   - Right Hand
   - Left Hand
+  - Water
+  - Weapon
   layers:
   - Default
   - TransparentFX
@@ -15,9 +17,9 @@ TagManager:
   - Water
   - UI
   - Ground
-  - 
-  - 
-  - 
+  - Player
+  - Icons
+  - Render on Minimap
   - 
   - 
   - 
@@ -41,6 +43,12 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: Background
+    uniqueID: 1958664377
+    locked: 0
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Minimap
+    uniqueID: 1125698995
     locked: 0
