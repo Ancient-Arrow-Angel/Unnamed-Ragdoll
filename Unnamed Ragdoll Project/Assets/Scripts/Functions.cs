@@ -23,7 +23,7 @@ public class Functions : MonoBehaviour
                 Limbs[i].GetComponent<Arms>().enabled = true;
             if (Limbs[i].GetComponent<Grab>() != null)
                 Limbs[i].GetComponent<Grab>().enabled = true;
-            if (Limbs[i].GetComponent<HingeJoint2D>() != null && Limbs[i].GetComponent<Arms>() == null)
+            if (Limbs[i].GetComponent<HingeJoint2D>() != null && Limbs[i].GetComponent<Arms>() == null && Limbs[i].GetComponent<CircleCollider2D>() != null)
                 Limbs[i].GetComponent<HingeJoint2D>().useLimits = true;
 
             player.LeftLeg.GetComponent<HingeJoint2D>().useLimits = false;

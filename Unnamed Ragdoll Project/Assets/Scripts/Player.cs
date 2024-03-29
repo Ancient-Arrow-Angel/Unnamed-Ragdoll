@@ -1,10 +1,7 @@
-using System.Collections;
-using System.Collections.Generic;
 using TMPro;
-using Unity.Burst.CompilerServices;
-using Unity.VisualScripting;
+using UnityEditor;
 using UnityEngine;
-using static UnityEditor.PlayerSettings;
+using UnityEngine.UI;
 
 public class Player : MonoBehaviour
 {
@@ -18,10 +15,14 @@ public class Player : MonoBehaviour
     public Transform PlayerPos;
     public TileMaker TileS;
 
-    [Header("Stats")]
+    [Header("Base Stats")]
     public float MiningCooldown;
     public int MiningDamage;
     public int MiningPower;
+    public int DamageMultiplier;
+    public int HeavyDamageMultiplier = 1;
+    public int LightDamageMultiplier = 1;
+    public int MagicDamageMultiplier = 1;
 
     [Header("Left Stats")]
     public float LeftMiningCooldown;
@@ -35,8 +36,10 @@ public class Player : MonoBehaviour
 
     public ParticleSystem DeathPart;
 
+    [Header("Movement Stats")]
     public float PlayerSpeed;
     public float JumpForce;
+    public float MaxSpeed;
 
     [Header("Items")]
     public int LeftID;
@@ -46,9 +49,6 @@ public class Player : MonoBehaviour
     public float MaxHealth = 100;
     public float Health;
     public TextMeshProUGUI HealthPercent;
-
-    public float FallAmount;
-    public float FallMultyplyer;
 
     public GameObject Menu;
 
@@ -66,22 +66,43 @@ public class Player : MonoBehaviour
 
     float MineCooldown;
 
-    public GameObject LeftESkill;
-    public GameObject LeftShiftSkill;
-
-    public GameObject RightESkill;
-    public GameObject RightShiftSkill;
-
-    public bool RightEActive;
-    public bool LeftEActive;
-
-    public bool RightShiftActive;
-    public bool LeftShiftActive;
-
     public GameObject DevTool;
 
-    void Awake()
+    public LimbHealth[] Legs;
+    public LimbHealth[] Chest;
+    public LimbHealth Head;
+
+    public GameObject ChestMenu;
+    GameObject[] ChestMenus;
+
+    public item LeftItem;
+    public item RightItem;
+
+    public bool PlayFail;
+    float FailCooldown;
+    public GameObject FailedPickup;
+    public GameObject CraftMenu;
+
+    public Reference Ref;
+
+    public CooldownBar LeftECool;
+    public CooldownBar RightECool;
+    public CooldownBar LeftShiftCool;
+    public CooldownBar RightShiftCool;
+
+    public Color NormalCoolColor;
+
+    public Grab LeftHand;
+    public Grab RightHand;
+
+    void Awake() 
     {
+        ChestMenus = new GameObject[ChestMenu.transform.GetComponentsInChildren<RectTransform>().Length -1];
+        for (int i = 1; i < ChestMenus.Length; i++)
+        {
+            ChestMenus[i-1] = ChestMenu.transform.GetComponentsInChildren<RectTransform>()[i].gameObject;
+        }
+
         Health = MaxHealth;
 
         TileS.enabled = true;
@@ -105,7 +126,84 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if(Input.GetKeyDown(KeyCode.P))
+        if(LeftItem != null)
+        {
+            if (LeftItem.ESkill != null)
+            {
+                LeftECool.GetComponentInChildren<Image>().color = NormalCoolColor;
+                LeftECool.transform.parent.GetComponent<Image>().color = Color.white;
+            }
+            else
+            {
+                LeftECool.GetComponentInChildren<Image>().color = Color.clear;
+                LeftECool.transform.parent.GetComponent<Image>().color = Color.clear;
+            }
+
+            if (LeftItem.ShiftSkill != null)
+            {
+                LeftShiftCool.GetComponentInChildren<Image>().color = NormalCoolColor;
+                LeftShiftCool.transform.parent.GetComponent<Image>().color = Color.white;
+            }
+            else
+            {
+                LeftShiftCool.GetComponentInChildren<Image>().color = Color.clear;
+                LeftShiftCool.transform.parent.GetComponent<Image>().color = Color.clear;
+            }
+        }
+        else
+        {
+            LeftECool.GetComponentInChildren<Image>().color = Color.clear;
+            LeftECool.transform.parent.GetComponent<Image>().color = Color.clear;
+            LeftShiftCool.GetComponentInChildren<Image>().color = Color.clear;
+            LeftShiftCool.transform.parent.GetComponent<Image>().color = Color.clear;
+        }
+        if (RightItem != null)
+        {
+            if (RightItem.ESkill != null)
+            {
+                RightECool.GetComponentInChildren<Image>().color = NormalCoolColor;
+                RightECool.transform.parent.GetComponent<Image>().color = Color.white;
+            }
+            else
+            {
+                RightECool.GetComponentInChildren<Image>().color = Color.clear;
+                RightECool.transform.parent.GetComponent<Image>().color = Color.clear;
+            }
+
+            if (RightItem.ShiftSkill != null)
+            {
+                RightShiftCool.GetComponentInChildren<Image>().color = NormalCoolColor;
+                RightShiftCool.transform.parent.GetComponent<Image>().color = Color.white;
+            }
+            else
+            {
+                RightShiftCool.GetComponentInChildren<Image>().color = Color.clear;
+                RightShiftCool.transform.parent.GetComponent<Image>().color = Color.clear;
+            }
+        }
+        else
+        {
+            RightECool.GetComponentInChildren<Image>().color = Color.clear;
+            RightECool.transform.parent.GetComponent<Image>().color = Color.clear;
+            RightShiftCool.GetComponentInChildren<Image>().color = Color.clear;
+            RightShiftCool.transform.parent.GetComponent<Image>().color = Color.clear;
+        }
+
+
+        FailCooldown -= Time.deltaTime;
+
+        if (PlayFail == true && FailCooldown <= 0)
+        {
+            Instantiate(FailedPickup, rb.transform.position, transform.rotation);
+            PlayFail = false;
+            FailCooldown = 2;
+        }
+        else
+        {
+            PlayFail = false;
+        }
+
+        if (Input.GetKeyDown(KeyCode.P))
         {
             Health = 0;
         }
@@ -123,11 +221,105 @@ public class Player : MonoBehaviour
 
         IsGrounded = Grounded();
 
+        if (Input.GetKeyDown(KeyCode.F))
+        {
+            if (LeftItem != null)
+            {
+                LeftItem.HandS = RightHand;
+
+                Destroy(LeftItem.GetComponent<FixedJoint2D>());
+                Rigidbody2D rb2 = RightHand.transform.GetComponent<Rigidbody2D>();
+                FixedJoint2D fj = LeftItem.transform.gameObject.AddComponent(typeof(FixedJoint2D)) as FixedJoint2D;
+                fj.connectedBody = rb2;
+
+                LeftItem.Held = true;
+                LeftItem.LeftHand = false;
+                RightHand.Active = false;
+
+                LeftItem.transform.position = RightHand.transform.position;
+
+                RightMiningDamage = LeftItem.MiningDamage;
+                RightMiningPower = LeftItem.MiningPower;
+                RightMiningCooldown = LeftItem.MiningCooldown;
+
+                RightID = LeftItem.BlockID;
+
+                RightHand.HeldID = LeftItem.ItemID;
+                RightHand.HeldAmount = LeftItem.ItemNum;
+
+                LeftItem.transform.localScale = new Vector2(-LeftItem.transform.localScale.x, LeftItem.transform.localScale.y);
+            }
+            if (RightItem != null)
+            {
+                RightItem.HandS = LeftHand;
+
+                Destroy(RightItem.GetComponent<FixedJoint2D>());
+                Rigidbody2D rb2 = LeftHand.transform.GetComponent<Rigidbody2D>();
+                FixedJoint2D fj = RightItem.transform.gameObject.AddComponent(typeof(FixedJoint2D)) as FixedJoint2D;
+                fj.connectedBody = rb2;
+
+                RightItem.Held = true;
+                RightItem.LeftHand = true;
+                LeftHand.Active = false;
+
+                RightItem.transform.position = LeftHand.transform.position;
+
+                LeftMiningDamage = RightItem.MiningDamage;
+                LeftMiningPower = RightItem.MiningPower;
+                LeftMiningCooldown = RightItem.MiningCooldown;
+
+                LeftID = RightItem.BlockID;
+
+                LeftHand.HeldID = RightItem.ItemID;
+                LeftHand.HeldAmount = RightItem.ItemNum;
+
+                RightItem.transform.localScale = new Vector2(-RightItem.transform.localScale.x, RightItem.transform.localScale.y);
+            }
+
+            if (LeftItem == null)
+            {
+                RightHand.Active = true;
+
+                RightMiningDamage = 0;
+                RightMiningPower = 0;
+                RightMiningCooldown = 0;
+
+                RightID = 0;
+
+                RightHand.HeldID = 0;
+                RightHand.HeldAmount = 0;
+            }
+
+            if (RightItem == null)
+            {
+                LeftHand.Active = true;
+
+                LeftMiningDamage = 0;
+                LeftMiningPower = 0;
+                LeftMiningCooldown = 0;
+
+                LeftID = 0;
+
+                LeftHand.HeldID = 0;
+                LeftHand.HeldAmount = 0;
+            }
+
+            item InterItem = null;
+            InterItem = RightItem;
+            RightItem = LeftItem;
+            LeftItem = InterItem;
+        }
+
         if (Input.GetKeyDown(KeyCode.Escape))
         {
             if(Menu.activeSelf)
             {
+                for (int i = 0; i < ChestMenus.Length - 1; i++)
+                {
+                    ChestMenus[i].SetActive(false);
+                }
                 Menu.SetActive(false);
+                CraftMenu.SetActive(false);
             }
             else
             {
@@ -139,40 +331,46 @@ public class Player : MonoBehaviour
         {
             if (Input.GetKey(KeyCode.Mouse0))
             {
-                if (LeftESkill == null)
+                if (TileS.TileTypes[TileS.CheckTile((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y))].IsLiquid && !Physics2D.OverlapCircle(new Vector2((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y)), 0.45f, EverthingBut) && LeftID != 0)
                 {
-                    if (TileS.TileTypes[TileS.CheckTile((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y))].IsLiquid && !Physics2D.OverlapCircle(new Vector2((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y)), 0.45f, EverthingBut) && LeftID != 0)
-                    {
-                        TileS.SetTile((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y), LeftID, true);
-                    }
-                    else if (LeftID == 0 && MineCooldown >= MiningCooldown + LeftMiningCooldown)
-                    {
-                        MineCooldown = 0;
-                        TileS.DamageTile((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y), MiningDamage + LeftMiningDamage, true, MiningPower + LeftMiningPower);
-                    }
+                    TileS.SetTile((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y), LeftID, true);
+
+                    if(LeftItem != null)
+                        LeftItem.ItemNum--;
                 }
-                else if (Input.GetKeyDown(KeyCode.E))
+                else if(TileS.CheckTile((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y)) == 0 && !Physics2D.OverlapCircle(new Vector2((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y)), 0.45f, EverthingBut) && LeftID != 0)
                 {
-                    LeftEActive = true;
+                    TileS.SetTile((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y), LeftID, true);
+
+                    if (LeftItem != null)
+                        LeftItem.ItemNum--;
+                }
+                else if (LeftID == 0 && MineCooldown >= MiningCooldown + LeftMiningCooldown && TileS.CheckTile((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y)) != 0)
+                {
+                    MineCooldown = 0;
+                    TileS.DamageTile((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y), MiningDamage + LeftMiningDamage, true, MiningPower + LeftMiningPower);
                 }
             }
             else if (Input.GetKey(KeyCode.Mouse1))
             {
-                if (RightESkill == null)
+                if (TileS.TileTypes[TileS.CheckTile((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y))].IsLiquid && !Physics2D.OverlapCircle(new Vector2((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y)), 0.45f, EverthingBut) && RightID != 0)
                 {
-                    if (TileS.TileTypes[TileS.CheckTile((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y))].IsLiquid && !Physics2D.OverlapCircle(new Vector2((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y)), 0.45f, EverthingBut) && RightID != 0)
-                    {
-                        TileS.SetTile((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y), RightID, true);
-                    }
-                    else if (RightID == 0 && MineCooldown >= MiningCooldown + RightMiningCooldown)
-                    {
-                        MineCooldown = 0;
-                        TileS.DamageTile((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y), MiningDamage + RightMiningDamage, true, MiningPower + RightMiningPower);
-                    }
+                    TileS.SetTile((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y), RightID, true);
+
+                    if (RightItem != null)
+                        RightItem.ItemNum--;
                 }
-                else if (Input.GetKeyDown(KeyCode.E))
+                else if (TileS.CheckTile((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y)) == 0 && !Physics2D.OverlapCircle(new Vector2((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y)), 0.45f, EverthingBut) && RightID != 0)
                 {
-                    RightEActive = true;
+                    TileS.SetTile((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y), RightID, true);
+
+                    if (RightItem != null)
+                        RightItem.ItemNum--;
+                }
+                else if (RightID == 0 && MineCooldown >= MiningCooldown + RightMiningCooldown && TileS.CheckTile((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y)) != 0) 
+                {
+                    MineCooldown = 0;
+                    TileS.DamageTile((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y), MiningDamage + RightMiningDamage, true, MiningPower + RightMiningPower);
                 }
             }
         }
@@ -180,44 +378,35 @@ public class Player : MonoBehaviour
         {
             if (Input.GetKey(KeyCode.Mouse0))
             {
-                if(LeftShiftSkill == null)
+                if (LeftID > 0 && TileS.CheckBackTile((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y)) == 0)
                 {
-                    if (LeftID > 0 && TileS.CheckBackTile((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y)) == 0)
-                    {
-                        TileS.SetTile((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y), LeftID, false);
-                    }
-                    else if (LeftID == 0 && MineCooldown >= MiningCooldown + LeftMiningCooldown)
-                    {
-                        MineCooldown = 0;
-                        TileS.DamageTile((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y), MiningDamage + LeftMiningDamage, false, MiningPower + LeftMiningPower);
-                    }
+                    TileS.SetTile((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y), LeftID, false);
+
+                    if (LeftItem != null)
+                        LeftItem.ItemNum--;
                 }
-                else if (Input.GetKeyDown(KeyCode.LeftShift))
+                else if (LeftID == 0 && MineCooldown >= MiningCooldown + LeftMiningCooldown) 
                 {
-                    LeftShiftActive = true;
+                    MineCooldown = 0;
+                    TileS.DamageTile((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y), MiningDamage + LeftMiningDamage, false, MiningPower + LeftMiningPower);
                 }
             }
             else if (Input.GetKey(KeyCode.Mouse1))
             {
-                if (RightShiftSkill == null && TileS.CheckBackTile((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y)) == 0)
+                if (RightID > 0 && TileS.CheckBackTile((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y)) == 0)
                 {
-                    if (RightID > 0)
-                    {
-                        TileS.SetTile((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y), RightID, false);
-                    }
-                    else if (RightID == 0 && MineCooldown >= MiningCooldown + RightMiningCooldown)
-                    {
-                        MineCooldown = 0;
-                        TileS.DamageTile((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y), MiningDamage + RightMiningDamage, false, MiningPower + RightMiningPower);
-                    }
+                    TileS.SetTile((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y), RightID, false);
+
+                    if (RightItem != null)
+                        RightItem.ItemNum--;
                 }
-                else if(Input.GetKeyDown(KeyCode.LeftShift))
+                else if (RightID == 0 && MineCooldown >= MiningCooldown + RightMiningCooldown) 
                 {
-                    RightShiftActive = true;
+                    MineCooldown = 0;
+                    TileS.DamageTile((int)Mathf.Round(worldPosition.x), (int)Mathf.Round(worldPosition.y), MiningDamage + RightMiningDamage, false, MiningPower + RightMiningPower);
                 }
             }
         }
-
 
         if (Input.GetKey(KeyCode.Space) && rb.GetComponent<WaterBuoyncy>().InWater)
         {
@@ -228,13 +417,27 @@ public class Player : MonoBehaviour
         {
             if (Input.GetAxisRaw("Horizontal") > 0)
             {
-                anim.Play("WalkForward");
-                rb.AddForce(PlayerSpeed * Time.deltaTime * Vector2.right);
+                if (rb.velocity.x < MaxSpeed)
+                {
+                    rb.AddForce(PlayerSpeed * Time.deltaTime * Vector2.right);
+                    anim.Play("WalkForward");
+                }
+                else
+                {
+                    anim.Play("Idle");
+                }
             }
             else
             {
-                anim.Play("WalkBackward");
-                rb.AddForce(PlayerSpeed * Time.deltaTime * Vector2.left);
+                if (rb.velocity.x > -MaxSpeed)
+                {
+                    anim.Play("WalkBackward");
+                    rb.AddForce(PlayerSpeed * Time.deltaTime * Vector2.left);
+                }
+                else
+                {
+                    anim.Play("Idle");
+                }
             }
         }
         else
@@ -267,20 +470,20 @@ public class Player : MonoBehaviour
         {
             if (LeftLeg.GetComponent<LimbHealth>().Health > 0)
             {
-                LeftLeg.GetComponent<Balance>().force = 200;
+                LeftLeg.GetComponent<Balance>().force = 600;
             }
             if (RightLeg.GetComponent<LimbHealth>().Health > 0)
             {
-                RightLeg.GetComponent<Balance>().force = 200;
+                RightLeg.GetComponent<Balance>().force = 600;
             }
 
             if (LeftFoot.GetComponent<LimbHealth>().Health > 0)
             {
-                LeftFoot.GetComponent<Balance>().force = 200;
+                LeftFoot.GetComponent<Balance>().force = 600;
             }
             if (RightFoot.GetComponent<LimbHealth>().Health > 0)
             {
-                RightFoot.GetComponent<Balance>().force = 200;
+                RightFoot.GetComponent<Balance>().force = 600;
             }
         }
 
@@ -294,15 +497,26 @@ public class Player : MonoBehaviour
         if (Health <= 0)
         {
             DeathPart.Play();
+            Menu.SetActive(false);
+            CraftMenu.SetActive(false);
             anim.Play("Game Over");
             GetComponentInChildren<LimbHealth>().Health = 0;
             this.enabled = false;
+        }
+
+        //if (Input.GetKey(KeyCode.LeftShift))
+        //{
+        //    rb.velocity = Vector2.zero;
+        //}
+        if (Input.GetKey(KeyCode.W))
+        {
+            rb.velocity = new Vector2(rb.velocity.x, 20);
         }
     }
 
     bool Grounded()
     {
-        bool hit = Physics2D.Raycast(PlayerPos.position, transform.TransformDirection(Vector2.down), CheckHeight, Ground);
+        bool hit = Physics2D.Raycast(rb.position, transform.TransformDirection(Vector2.down), CheckHeight, Ground);
         return hit;
     }
 }

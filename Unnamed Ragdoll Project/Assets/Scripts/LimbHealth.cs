@@ -8,7 +8,8 @@ public class LimbHealth : MonoBehaviour
 {
     public float Health;
     public float MaxHealth = 100;
-    public int Defence;
+    float PreHealth = 1;
+    public float Defence;
 
     public float HealthContribution;
     public Image LimbIcon;
@@ -23,7 +24,10 @@ public class LimbHealth : MonoBehaviour
     bool Hit;
 
     AudioSource Sound;
-    Color FlashAmount;
+    public Color FlashAmount;
+
+    public float JumpContribution;
+    public float SpeedContribution;
 
     public void TakeDamage(float damage)
     {
@@ -63,38 +67,27 @@ public class LimbHealth : MonoBehaviour
 
     void Update()
     {
-        FlashAmount.g += 2 * Time.deltaTime;
-        FlashAmount.b += 2 * Time.deltaTime;
-        LimbSprite.color = FlashAmount;
-
-        if (Health > MaxHealth)
+        if(Health > 0 && PreHealth <= 0)
         {
-            Health = MaxHealth;
-        }
-
-        if (Attached.GetComponent<HuminoidEnemyAI>() != null && Attached.GetComponent<HuminoidEnemyAI>().Pursuing || Attached.GetComponent<Player>() != null)
-        {
-            if (LimbIcon != null && Health > 0)
+            if(PlayerAttached)
             {
-                color = new Color((MaxHealth - Health) / MaxHealth, (Health) / MaxHealth, 0, 255);
-                LimbIcon.color = color;
+                Attached.GetComponent<Player>().PlayerSpeed += SpeedContribution;
+                Attached.GetComponent<Player>().JumpForce += JumpContribution;
             }
         }
-        else
-        {
-            if (LimbIcon != null && Health > 0)
-            {
-                color = new Color(0, 0, 0, 0);
-                LimbIcon.color = color;
-            }
-        }
-        if(Health <= 0)
+
+        if (Health <= 0)
         {
             FlashAmount.b = 0;
             FlashAmount.g = 0;
             FlashAmount.r = 255;
-            FlashAmount.r = 255;
             LimbSprite.color = FlashAmount;
+
+            if (PlayerAttached)
+            {
+                Attached.GetComponent<Player>().PlayerSpeed -= SpeedContribution;
+                Attached.GetComponent<Player>().JumpForce -= JumpContribution;
+            }
 
             if (PlayerAttached)
             {
@@ -102,10 +95,11 @@ public class LimbHealth : MonoBehaviour
             }
             else
             {
-                Attached.GetComponent<EnemyStats>().Health -= HealthContribution;
+                if(Attached != null)
+                    Attached.GetComponent<EnemyStats>().Health -= HealthContribution;
             }
 
-            if(GetComponent<Balance>() != null)
+            if (GetComponent<Balance>() != null)
             {
                 GetComponent<Balance>().enabled = false;
             }
@@ -117,15 +111,15 @@ public class LimbHealth : MonoBehaviour
 
             //if (Hit == true)
             //{
-                if (GetComponent<HingeJoint2D>() != null)
-                {
-                    GetComponent<HingeJoint2D>().useLimits = false;
-                }
+            if (GetComponent<HingeJoint2D>() != null)
+            {
+                GetComponent<HingeJoint2D>().useLimits = false;
+            }
 
-                //if (GetComponent<FixedJoint2D>() != null)
-                //{
-                //    GetComponent<FixedJoint2D>().enabled = false;
-                //}
+            //if (GetComponent<FixedJoint2D>() != null)
+            //{
+            //    GetComponent<FixedJoint2D>().enabled = false;
+            //}
             //}
 
             for (int i = 0; i < Connects.Length; i++)
@@ -152,7 +146,35 @@ public class LimbHealth : MonoBehaviour
 
             this.enabled = false;
         }
+
+        FlashAmount.g += 2 * Time.deltaTime;
+        FlashAmount.b += 2 * Time.deltaTime;
+        LimbSprite.color = FlashAmount;
+
+        if (Health > MaxHealth)
+        {
+            Health = MaxHealth;
+        }
+
+        if (Attached.GetComponent<HuminoidEnemyAI>() != null && Attached.GetComponent<HuminoidEnemyAI>().Pursuing || Attached.GetComponent<Player>() != null)
+        {
+            if (LimbIcon != null && Health > 0)
+            {
+                color = new Color((MaxHealth - Health) / MaxHealth, (Health) / MaxHealth, 0, 255);
+                LimbIcon.color = color;
+            }
+        }
+        else
+        {
+            if (LimbIcon != null && Health > 0)
+            {
+                color = new Color(0, 0, 0, 0);
+                LimbIcon.color = color;
+            }
+        }
         Hit = false;
+
+        PreHealth = Health;
     }
 
     void OnCollisionEnter2D(Collision2D collision)
@@ -182,21 +204,45 @@ public class LimbHealth : MonoBehaviour
 
         float damage = Mathf.Max(0f, otherApproach - myApproach - 1);
 
-        //Sound.volume = damage * 0.005f;
-        FlashAmount.b = 0;
-        FlashAmount.g = 0;
-        //Sound.Play();
-
-        if (collision.transform.CompareTag("Weapon"))
+        if (collision.transform.CompareTag("Weapon") || collision.transform.CompareTag("Enemy Weapon") || collision.transform.CompareTag("Grab Enemy Weapon"))
         {
-            TakeDamage(damage * collision.gameObject.GetComponent<item>().Damage - Defence);
+            if (collision.gameObject.GetComponent<item>().Held)
+            {
+                //Sound.volume = damage * 0.005f;
+                FlashAmount.b = 0;
+                FlashAmount.g = 0;
+                //Sound.Play();
 
-            if(collision.gameObject.GetComponent<item>().Held)
+                TakeDamage(damage * (collision.gameObject.GetComponent<item>().HeavyDamage * collision.gameObject.GetComponent<item>().HeavyDamageMod) - Defence);
+                TakeDamage(damage * (collision.gameObject.GetComponent<item>().LightDamage * collision.gameObject.GetComponent<item>().LightDamageMod) - Defence);
+                TakeDamage(damage * (collision.gameObject.GetComponent<item>().MagicDamage * collision.gameObject.GetComponent<item>().MagicDamageMod) - Defence);
                 rb.AddForce((transform.position - collision.transform.position).normalized * collision.gameObject.GetComponent<item>().Knockback);
+            }
+            else if (!collision.gameObject.GetComponent<item>().Grabable)
+            {
+                //Sound.volume = damage * 0.005f;
+                FlashAmount.b = 0;
+                FlashAmount.g = 0;
+                //Sound.Play();
+
+                TakeDamage(damage * collision.gameObject.GetComponent<item>().HeavyDamage - Defence);
+                TakeDamage(damage * collision.gameObject.GetComponent<item>().LightDamage - Defence);
+                TakeDamage(damage * collision.gameObject.GetComponent<item>().MagicDamage - Defence);
+
+                rb.AddForce((transform.position - collision.transform.position).normalized * collision.gameObject.GetComponent<item>().Knockback);
+            }
         }
         else
         {
-            TakeDamage(damage * 0.5f - Defence);
+            if (damage > 20f || !PlayerAttached)
+            {
+                //Sound.volume = damage * 0.005f;
+                FlashAmount.b = 0;
+                FlashAmount.g = 0;
+                //Sound.Play();
+                if (damage * 0.15f - Defence >= 0)
+                    TakeDamage(Mathf.Pow(damage * 0.15f - Defence, 2f) / 4);
+            }
         }
     }
 }

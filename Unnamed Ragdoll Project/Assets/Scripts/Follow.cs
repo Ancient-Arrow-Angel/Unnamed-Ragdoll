@@ -22,17 +22,20 @@ public class Follow : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Pos = transform.position;
-
-        if (XFollow)
+        if (Target != null)
         {
-            Pos.x = Target.position.x + Offset.x;
-        }
-        if (YFollow)
-        {
-            Pos.y = Target.position.y + Offset.y;
-        }
+            Pos = transform.position;
 
-        transform.position = Pos;
+            if (XFollow)
+            {
+                Pos.x = Target.position.x + Offset.x;
+            }
+            if (YFollow)
+            {
+                Pos.y = Target.position.y + Offset.y;
+            }
+
+            transform.position = Pos;
+        }
     }
 }

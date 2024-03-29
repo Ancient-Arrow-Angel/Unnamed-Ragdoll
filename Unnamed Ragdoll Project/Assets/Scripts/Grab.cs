@@ -30,7 +30,7 @@ public class Grab : MonoBehaviour
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (Active && hold && collision.gameObject.tag == "Grab")
+        if (Active && hold && collision.gameObject.tag == "Grab" || collision.transform.CompareTag("Grab Enemy Weapon") && Active && hold)
         {
             Rigidbody2D rb = collision.transform.GetComponent<Rigidbody2D>();
             if (rb != null)

@@ -9,19 +9,23 @@ TagManager:
   - Left Hand
   - Water
   - Weapon
+  - Ground
+  - Item
+  - Enemy Weapon
+  - Grab Enemy Weapon
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Invisible
   - Water
   - UI
   - Ground
   - Player
   - Icons
   - Render on Minimap
-  - 
-  - 
+  - Furniture
+  - Items
   - 
   - 
   - 
@@ -43,6 +47,12 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: Sky
+    uniqueID: 915288135
+    locked: 0
+  - name: Celestial
+    uniqueID: 1104312965
+    locked: 0
   - name: Background
     uniqueID: 1958664377
     locked: 0

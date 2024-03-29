@@ -15,13 +15,17 @@ public class Spawner : MonoBehaviour
 
     float Timer;
 
+    public float Range;
+
     TileMaker tileMaker;
+    Player player;
 
     // Start is called before the first frame update
     void Start()
     {
         Timer = Random.Range(MinSpawnTimer, MaxSpawnTimer);
         tileMaker = GameObject.Find("Grid").GetComponent<TileMaker>();
+        player = GameObject.Find("Player").GetComponent<Player>();
     }
 
     // Update is called once per frame
@@ -40,7 +44,7 @@ public class Spawner : MonoBehaviour
                     if (Random.Range(0, 101) >= Spawns[ToSpawn].SpawnRarity)
                     {
                         Worked = true;
-                        Instantiate(Spawns[ToSpawn].ToSpawn, new Vector2(Random.Range(0, tileMaker.WorldWidth), tileMaker.WorldHeight + 10), transform.rotation);
+                        Instantiate(Spawns[ToSpawn].ToSpawn, new Vector2(Random.Range(player.rb.transform.position.x - Range, player.rb.transform.position.x + Range), tileMaker.WorldHeight + 10), transform.rotation);
                     }
                 }
                 CurrentEnemies++;

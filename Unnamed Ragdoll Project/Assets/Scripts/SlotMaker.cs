@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.UI;
 using TMPro;
+using Unity.VisualScripting;
 
 public class SlotMaker : MonoBehaviour
 {
@@ -45,6 +46,10 @@ public class SlotMaker : MonoBehaviour
 
     public Reference Ref;
     public bool Cancel;
+    public GameObject SpawnPart;
+    public GameObject FailSpawnPart;
+
+    public RectTransform[] NonDrops;
 
     Vector2 Pos;
 
@@ -74,24 +79,15 @@ public class SlotMaker : MonoBehaviour
         Slots = GetComponentsInChildren<Transform>();
         ItemNums = NumKeep.GetComponentsInChildren<TextMeshProUGUI>();
 
-
-        Ref.AddItem(3, 1);
-        Ref.AddItem(1, 1);
-        Ref.AddItem(2, 500);
-        Ref.AddItem(4, 500);
-
         CursorSprite.color = new Color(255, 255, 255, 0);
         CursorItemNum.text = "";
         UpdateInventor();
         Menu.SetActive(false);
     }
 
-    private void Update()
+    private void LateUpdate()
     {
-        if(CursorID != 0)
-            ItemText.text = Ref.Items[CursorID].Item.name;
-        else
-            ItemText.text = "";
+        Vector3 mousePos = Input.mousePosition;
 
         CursorSprite.sprite = Ref.Items[CursorID].icon;
         if (CursorID == 0)
@@ -118,9 +114,8 @@ public class SlotMaker : MonoBehaviour
 
         UpdateInventor();
 
-        if (Input.GetMouseButtonDown(1) && !Cancel)
+        if (Input.GetMouseButtonDown(1) && Cancel == false)
         {
-            Vector3 mousePos = Input.mousePosition;
             for (int i = 1; i < XSlots * YSlots + 1; i++)
             {
                 if (mousePos.x <= Slots[i].transform.position.x + SlotSize &&
@@ -134,13 +129,12 @@ public class SlotMaker : MonoBehaviour
                         CursorNum++;
                         CursorID = SlotIDs[i];
                     }
-                    else if (Ref.Items[SlotIDs[i]].Stackable && CursorID == SlotIDs[i])
+                    else if (Ref.Items[SlotIDs[i]].Stackable && CursorID == SlotIDs[i] && SlotNumbers[i] < Ref.StackAmount)
                     {
                         SlotNumbers[i]++;
                         CursorNum--;
-                        SlotIDs[i] = CursorID;
                     }
-                    else if (SlotIDs[i] == 0)
+                    else if (SlotIDs[i] == 0 && CursorID > 0)
                     {
                         SlotNumbers[i]++;
                         CursorNum--;
@@ -160,18 +154,43 @@ public class SlotMaker : MonoBehaviour
             }
             if (CursorID > 0)
             {
-                if (!Physics2D.OverlapCircle(mousePos = Camera.main.ScreenToWorldPoint(mousePos), SpawnRadius, EverythingBUT))
+                bool CanDrop = false;
+                for (int i = 0; i < NonDrops.Length; i++)
                 {
-                    item Created = Instantiate(Ref.Items[CursorID].Item, mousePos, transform.rotation).GetComponent<item>();
-                    Created.Num = 1;
-                    CursorNum -= 1;
+                    if (mousePos.x <= NonDrops[i].transform.position.x + NonDrops[i].sizeDelta.x / 2 &&
+                        mousePos.x >= NonDrops[i].transform.position.x - NonDrops[i].sizeDelta.x / 2 &&
+                        mousePos.y <= NonDrops[i].transform.position.y + NonDrops[i].sizeDelta.y / 2 &&
+                        mousePos.y >= NonDrops[i].transform.position.y - NonDrops[i].sizeDelta.y / 2 &&
+                        NonDrops[i].gameObject.activeInHierarchy)
+                    {
+                        CanDrop = false;
+                        i = 999;
+                    }
+                    else
+                    {
+                        CanDrop = true;
+                    }
+                }
+
+                if (CanDrop)
+                {
+                    if (!Physics2D.OverlapCircle(mousePos = Camera.main.ScreenToWorldPoint(mousePos), SpawnRadius, EverythingBUT))
+                    {
+                        item Created = Instantiate(Ref.Items[CursorID].Item, mousePos, transform.rotation).GetComponent<item>();
+                        Created.ItemNum = 1;
+                        CursorNum -= 1;
+                        Instantiate(SpawnPart, mousePos, transform.rotation);
+                    }
+                    else
+                    {
+                        Instantiate(FailSpawnPart, mousePos, transform.rotation);
+                    }
                 }
             }
         }
 
-        if (Input.GetMouseButtonDown(0) && !Cancel)
+        if (Input.GetMouseButtonDown(0) && Cancel == false)
         {
-            Vector3 mousePos = Input.mousePosition;
             for (int i = 1; i < XSlots * YSlots + 1; i++)
             {
                 if (mousePos.x <= Slots[i].transform.position.x + SlotSize &&
@@ -179,13 +198,25 @@ public class SlotMaker : MonoBehaviour
                     mousePos.y <= Slots[i].transform.position.y + SlotSize &&
                     mousePos.y >= Slots[i].transform.position.y - SlotSize)
                 {
-                    if (SlotIDs[i] == CursorID && Ref.Items[CursorID].Stackable)
+                    if (SlotIDs[i] == CursorID && Ref.Items[CursorID].Stackable && SlotNumbers[i] < Ref.StackAmount && CursorNum < Ref.StackAmount)
                     {
-                        SlotIDs[i] = CursorID;
-                        CursorID = 0;
+                        if (SlotNumbers[i] + CursorNum >= Ref.StackAmount)
+                        {
+                            CursorNum -= Ref.StackAmount - SlotNumbers[i];
+                            SlotNumbers[i] = Ref.StackAmount;
+                        }
+                        else if (SlotNumbers[i] == Ref.StackAmount)
+                        {
 
-                        SlotNumbers[i] += CursorNum;
-                        CursorNum = 0;
+                        }
+                        else
+                        {
+                            SlotIDs[i] = CursorID;
+                            CursorID = 0;
+
+                            SlotNumbers[i] += CursorNum;
+                            CursorNum = 0;
+                        }
                     }
                     else
                     {
@@ -206,15 +237,60 @@ public class SlotMaker : MonoBehaviour
             }
             if(CursorID > 0)
             {
-                if (!Physics2D.OverlapCircle(mousePos = Camera.main.ScreenToWorldPoint(mousePos), SpawnRadius, EverythingBUT))
+                bool CanDrop = false;
+                for (int i = 0; i < NonDrops.Length; i++)
                 {
-                    item Created = Instantiate(Ref.Items[CursorID].Item, mousePos, transform.rotation).GetComponent<item>();
-                    Created.Num = CursorNum;
-                    CursorID = 0;
+                    if (mousePos.x <= NonDrops[i].transform.position.x + NonDrops[i].sizeDelta.x / 2 &&
+                        mousePos.x >= NonDrops[i].transform.position.x - NonDrops[i].sizeDelta.x / 2 &&
+                        mousePos.y <= NonDrops[i].transform.position.y + NonDrops[i].sizeDelta.y / 2 &&
+                        mousePos.y >= NonDrops[i].transform.position.y - NonDrops[i].sizeDelta.y / 2 &&
+                        NonDrops[i].gameObject.activeInHierarchy)
+                    {
+                        CanDrop = false;
+                        i = 999;
+                    }
+                    else
+                    {
+                        CanDrop = true;
+                    }
+                }
+
+                if(CanDrop)
+                {
+                    if (!Physics2D.OverlapCircle(mousePos = Camera.main.ScreenToWorldPoint(mousePos), SpawnRadius, EverythingBUT))
+                    {
+                        item Created = Instantiate(Ref.Items[CursorID].Item, mousePos, transform.rotation).GetComponent<item>();
+                        Created.ItemNum = CursorNum;
+                        CursorID = 0;
+                        Instantiate(SpawnPart, mousePos, transform.rotation);
+                    }
+                    else
+                    {
+                        Instantiate(FailSpawnPart, mousePos, transform.rotation);
+                    }
                 }
             }
         }
         Cancel = false;
+
+        for (int i = 1; i < XSlots * YSlots + 1; i++)
+        {
+            if (mousePos.x <= Slots[i].transform.position.x + SlotSize &&
+                mousePos.x >= Slots[i].transform.position.x - SlotSize &&
+                mousePos.y <= Slots[i].transform.position.y + SlotSize &&
+                mousePos.y >= Slots[i].transform.position.y - SlotSize)
+            {
+                if(Ref.Items[SlotIDs[i]].Item != null && CursorID == 0)
+                    ItemText.text = Ref.Items[SlotIDs[i]].Item.name + Ref.Items[SlotIDs[i]].Description;
+                else
+                    ItemText.text = "";
+                i = 999999;
+            }
+            else
+            {
+                ItemText.text = "";
+            }
+        }
     }
 
     public void UpdateInventor()
