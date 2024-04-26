@@ -87,6 +87,14 @@ public class DamageInput : MonoBehaviour
 
                 rb.AddForce((transform.position - collision.transform.position).normalized * collision.gameObject.GetComponent<item>().Knockback);
             }
+            else if (collision.gameObject.GetComponent<item>().HurtAll)
+            {
+                TakeDamage(damage * collision.gameObject.GetComponent<item>().HeavyDamage - Defence);
+                TakeDamage(damage * collision.gameObject.GetComponent<item>().LightDamage - Defence);
+                TakeDamage(damage * collision.gameObject.GetComponent<item>().MagicDamage - Defence);
+
+                rb.AddForce((transform.position - collision.transform.position).normalized * collision.gameObject.GetComponent<item>().Knockback);
+            }
         }
     }
 }

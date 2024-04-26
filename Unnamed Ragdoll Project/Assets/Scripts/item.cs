@@ -12,6 +12,7 @@ public class item : MonoBehaviour
     public float LightDamage;
     public float MagicDamage;
     public float Knockback;
+    public float HitManaMod = 0;
     [HideInInspector]
     public float HeavyDamageMod = 1;
     [HideInInspector]
@@ -22,10 +23,14 @@ public class item : MonoBehaviour
     [Header("Skill Stats")]
     public GameObject ESkill;
     public float ECooldown;
+    public int EManaCost;
     public bool EHold;
     public GameObject ShiftSkill;
     public float ShiftCooldown;
+    public int ShiftManaCost;
     public bool ShiftHold;
+    public GameObject HeavySkill;
+    public float HeavyForce;
     float ETimer;
     float ShiftTimer;
 
@@ -49,9 +54,11 @@ public class item : MonoBehaviour
     public GameObject CeilingMount;
 
     [Header("Other")]
+    public bool Consumable;
     public bool Grabable = true;
+    public bool HurtAll;
     public int ItemNum = 1;
-
+    
     [HideInInspector]
     public bool Held = false;
     [HideInInspector]
@@ -80,6 +87,8 @@ public class item : MonoBehaviour
 
     public ParticleSystem OnHitParts;
 
+    Rigidbody2D rb2;
+
     void NoColl(bool Active)
     {
         Collider2D[] Colliders = PlayerOB.transform.GetComponentsInChildren<Collider2D>();
@@ -98,7 +107,7 @@ public class item : MonoBehaviour
     }
 
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         Ref = GameObject.Find("Global Ref").GetComponent<Reference>();
         Inventory = Ref.Inventory;
@@ -113,8 +122,99 @@ public class item : MonoBehaviour
         {
             InnerColl = gameObject.AddComponent<BoxCollider2D>();
             InnerColl.offset = Coll[0].offset;
-            InnerColl.size = new Vector2(Coll[0].bounds.size.x - 0.1f, Coll[0].bounds.size.y - 0.1f);
+            InnerColl.size = new Vector2(Coll[0].bounds.size.x - Coll[0].bounds.size.x / 1.5f, Coll[0].bounds.size.y - Coll[0].bounds.size.y / 1.5f);
             InnerColl.isTrigger = true;
+        }
+    }
+
+    private void FixedUpdate()
+    {
+        if(PlayerS.Health > 0)
+        {
+            Vector3 playerpos = new Vector3(cam.ScreenToWorldPoint(Input.mousePosition).x, cam.ScreenToWorldPoint(Input.mousePosition).y, 0);
+            Vector3 difference = playerpos - transform.position;
+            float rotationZ = Mathf.Atan2(difference.x, -difference.y) * Mathf.Rad2Deg;
+
+            if (Input.GetKey(KeyCode.Mouse0) && LeftHand == true && Held && speed > 0)
+            {
+                rb.MoveRotation(Mathf.LerpAngle(rb.rotation, rotationZ + offset, speed * Time.fixedDeltaTime));
+            }
+            else if (Input.GetKey(KeyCode.Mouse1) && LeftHand == false && Held && speed > 0)
+            {
+                rb.MoveRotation(Mathf.LerpAngle(rb.rotation, rotationZ + offset, speed * Time.fixedDeltaTime));
+            }
+        }
+
+        if (ItemNum <= 0)
+        {
+            if (Held)
+            {
+                HandS.Active = true;
+
+                if (LeftHand)
+                {
+                    PlayerS.LeftMiningDamage = 0;
+                    PlayerS.LeftMiningPower = 0;
+                    PlayerS.LeftMiningCooldown = 0;
+
+                    PlayerS.LeftID = 0;
+
+                    HandS.HeldID = 0;
+                    HandS.HeldAmount = 0;
+
+                    PlayerS.LeftItem = null;
+
+                    PlayerS.LeftECool.SetValue(0);
+
+                    PlayerS.LeftShiftCool.SetValue(0);
+                }
+                else
+                {
+                    PlayerS.RightMiningDamage = 0;
+                    PlayerS.RightMiningPower = 0;
+                    PlayerS.RightMiningCooldown = 0;
+
+                    PlayerS.RightID = 0;
+
+                    HandS.HeldID = 0;
+                    HandS.HeldAmount = 0;
+
+                    PlayerS.RightItem = null;
+
+                    PlayerS.RightECool.SetValue(0);
+
+                    PlayerS.RightShiftCool.SetValue(0);
+                }
+
+                HandS.HeldID = 0;
+            }
+
+            DestroyImmediate(this.gameObject);
+        }
+
+        if(this != null)
+        {
+            if (Physics2D.OverlapCircle(transform.position, Ref.ItemCombineRange, Ref.ItemMask))
+            {
+                item OtherItem = Physics2D.OverlapCircle(transform.position, Ref.ItemCombineRange, Ref.ItemMask).GetComponent<item>();
+                if (OtherItem.ItemID > 0 && OtherItem.ItemID == ItemID && OtherItem != this)
+                {
+                    if (!OtherItem.Held)
+                    {
+                        if (OtherItem.ItemNum + ItemNum > Ref.StackAmount)
+                        {
+                            int Aint = ItemNum;
+                            ItemNum += OtherItem.ItemNum - (OtherItem.ItemNum + ItemNum - Ref.StackAmount);
+                            OtherItem.ItemNum -= (ItemNum - Aint);
+                        }
+                        else
+                        {
+                            ItemNum += OtherItem.ItemNum;
+                            OtherItem.ItemNum = 0;
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -128,7 +228,10 @@ public class item : MonoBehaviour
         {
             if (InnerColl.IsTouchingLayers(Ref.GroundMask))
             {
-                Coll[0].isTrigger = true;
+                if (Held)
+                {
+                    Coll[0].isTrigger = true;
+                }
             }
             else
             {
@@ -288,25 +391,11 @@ public class item : MonoBehaviour
                             }
                         }
 
-                        if (CanBackPlace && BackgroundMount != null)
-                        {
-                            BackgroundMount.SetActive(true);
-                            //GameObject NewPlaced = Instantiate(BackgroundMount, new Vector2(Mathf.Round(mousePos.x), Mathf.Round(mousePos.y)), Quaternion.Euler(0, 0, 0));
-                            Ref.grid.FurnitureIDS[(int)Mathf.Round(mousePos.x) + (int)Mathf.Round(mousePos.y) * Ref.grid.WorldWidth] = FurnitureID;
-                            ItemNum--;
-                            BackgroundMount.SetActive(false);
-                        }
-                        else if (CanGroundPlace && GroundPlaced != null)
-                        {
-                            GroundPlaced.SetActive(true);
-                            GameObject NewPlaced = Instantiate(GroundPlaced, new Vector2(Mathf.Round(mousePos.x), Mathf.Round(mousePos.y)), Quaternion.Euler(0, 0, 0));
-                            ItemNum--;
-                            GroundPlaced.SetActive(false);
-                        }
-                        else if (CanLeftPlace && LeftWallMount != null)
+                        if (CanLeftPlace && LeftWallMount != null)
                         {
                             LeftWallMount.SetActive(true);
                             GameObject NewPlaced = Instantiate(LeftWallMount, new Vector2(Mathf.Round(mousePos.x), Mathf.Round(mousePos.y)), Quaternion.Euler(0, 0, 0));
+                            Ref.grid.FurnitureIDS[(int)Mathf.Round(mousePos.x) + (int)Mathf.Round(mousePos.y) * Ref.grid.WorldWidth] = FurnitureID;
                             ItemNum--;
                             LeftWallMount.SetActive(false);
                         }
@@ -314,17 +403,34 @@ public class item : MonoBehaviour
                         {
                             RightWallMount.SetActive(true);
                             GameObject NewPlaced = Instantiate(RightWallMount, new Vector2(Mathf.Round(mousePos.x), Mathf.Round(mousePos.y)), Quaternion.Euler(0, 0, 0));
+                            Ref.grid.FurnitureIDS[(int)Mathf.Round(mousePos.x) + (int)Mathf.Round(mousePos.y) * Ref.grid.WorldWidth] = FurnitureID;
                             ItemNum--;
                             RightWallMount.SetActive(false);
+                        }
+                        else if (CanGroundPlace && GroundPlaced != null)
+                        {
+                            GroundPlaced.SetActive(true);
+                            GameObject NewPlaced = Instantiate(GroundPlaced, new Vector2(Mathf.Round(mousePos.x), Mathf.Round(mousePos.y)), Quaternion.Euler(0, 0, 0));
+                            Ref.grid.FurnitureIDS[(int)Mathf.Round(mousePos.x) + (int)Mathf.Round(mousePos.y) * Ref.grid.WorldWidth] = FurnitureID;
+                            ItemNum--;
+                            GroundPlaced.SetActive(false);
+                        }
+                        else if (CanBackPlace && BackgroundMount != null)
+                        {
+                            BackgroundMount.SetActive(true);
+                            GameObject NewPlaced = Instantiate(BackgroundMount, new Vector2(Mathf.Round(mousePos.x), Mathf.Round(mousePos.y)), Quaternion.Euler(0, 0, 0));
+                            Ref.grid.FurnitureIDS[(int)Mathf.Round(mousePos.x) + (int)Mathf.Round(mousePos.y) * Ref.grid.WorldWidth] = FurnitureID;
+                            ItemNum--;
+                            BackgroundMount.SetActive(false);
                         }
                         else if (CanTopPlace && CeilingMount != null)
                         {
                             CeilingMount.SetActive(true);
                             GameObject NewPlaced = Instantiate(CeilingMount, new Vector2(Mathf.Round(mousePos.x), Mathf.Round(mousePos.y)), Quaternion.Euler(0, 0, 0));
+                            Ref.grid.FurnitureIDS[(int)Mathf.Round(mousePos.x) + (int)Mathf.Round(mousePos.y) * Ref.grid.WorldWidth] = FurnitureID;
                             ItemNum--;
                             CeilingMount.SetActive(false);
                         }
-
                     }
 
                     if (Input.GetKeyDown(KeyCode.E) && ArmorType > 0)
@@ -368,13 +474,23 @@ public class item : MonoBehaviour
 
                         PlayerS.LeftItem = null;
                     }
-                    if (Input.GetKeyDown(KeyCode.E) && ESkill != null && ETimer <= 0 && EHold == false || Input.GetKey(KeyCode.E) && ESkill != null && ETimer <= 0 && EHold == true)
+                    if (Input.GetKeyDown(KeyCode.E) && ESkill != null && ETimer <= 0 && EHold == false && PlayerS.Mana - EManaCost >= 0 || Input.GetKey(KeyCode.E) && ESkill != null && ETimer <= 0 && EHold == true && PlayerS.Mana - EManaCost >= 0)
                     {
+                        PlayerS.Mana -= EManaCost;
+
+                        if (Consumable)
+                            ItemNum--;
+
                         Instantiate(ESkill, transform.position, transform.rotation).GetComponent<GetWeapon>().Creator = this;
                         ETimer = ECooldown;
                     }
-                    else if (Input.GetKeyDown(KeyCode.LeftShift) && ShiftSkill != null && ShiftTimer < 0 && ShiftHold == false || Input.GetKey(KeyCode.LeftShift) && ShiftSkill != null && ShiftTimer < 0 && ShiftHold == true)
+                    else if (Input.GetKeyDown(KeyCode.LeftShift) && ShiftSkill != null && ShiftTimer < 0 && ShiftHold == false && PlayerS.Mana - ShiftManaCost >= 0 || Input.GetKey(KeyCode.LeftShift) && ShiftSkill != null && ShiftTimer < 0 && ShiftHold == true && PlayerS.Mana - ShiftManaCost >= 0)
                     {
+                         PlayerS.Mana -= ShiftManaCost;
+
+                        if (Consumable)
+                            ItemNum--;
+
                         Instantiate(ShiftSkill, transform.position, transform.rotation).GetComponent<GetWeapon>().Creator = this;
                         ShiftTimer = ShiftCooldown;
                     }
@@ -404,16 +520,120 @@ public class item : MonoBehaviour
                     if (GhostObject != null)
                     {
                         GhostObject.SetActive(true);
-                        GhostObject.transform.position = new Vector2(Mathf.Round(mousePos.x), Mathf.Round(mousePos.y));
+                        GhostObject.transform.position = new Vector2(Mathf.Round(mousePos.x + Width - 1), Mathf.Round(mousePos.y));
                         GhostObject.transform.rotation = Quaternion.Euler(0, 0, 0);
                     }
 
-                    if(Input.GetKeyDown(KeyCode.E) && IsFurniture)
+                    if (Input.GetKeyDown(KeyCode.E) && IsFurniture)
                     {
-                        GroundPlaced.SetActive(true);
-                        GameObject NewPlaced = Instantiate(GroundPlaced, new Vector2(Mathf.Round(mousePos.x), Mathf.Round(mousePos.y)), Quaternion.Euler(0, 0, 0));
-                        ItemNum--;
-                        GroundPlaced.SetActive(false);
+                        bool CanGroundPlace = true;
+                        bool CanLeftPlace = true;
+                        bool CanRightPlace = true;
+                        bool CanTopPlace = true;
+                        bool CanBackPlace = true;
+
+                        for (int i = 0; i < Height; i++)
+                        {
+                            for (int j = 0; j < Width; j++)
+                            {
+                                if (Ref.grid.CheckTile(j + (int)Mathf.Round(mousePos.x), i + (int)Mathf.Round(mousePos.y)) > 0)
+                                {
+                                    CanGroundPlace = false;
+                                    CanLeftPlace = false;
+                                    CanRightPlace = false;
+                                    CanTopPlace = false;
+                                    CanBackPlace = false;
+                                }
+                                else if (Physics2D.OverlapCircle(new Vector2(j + (int)Mathf.Round(mousePos.x), i + (int)Mathf.Round(mousePos.y)), 0.45f, Ref.FurnitureMask))
+                                {
+                                    CanGroundPlace = false;
+                                    CanLeftPlace = false;
+                                    CanRightPlace = false;
+                                    CanTopPlace = false;
+                                    CanBackPlace = false;
+                                }
+                            }
+                        }
+
+                        for (int i = 0; i < Width; i++)
+                        {
+                            if (Ref.grid.CheckTile(i + (int)Mathf.Round(mousePos.x), (int)Mathf.Round(mousePos.y) - 1) == 0 || Ref.grid.TileTypes[Ref.grid.CheckTile(i + (int)Mathf.Round(mousePos.x), (int)Mathf.Round(mousePos.y) - 1)].IsLiquid)
+                            {
+                                CanGroundPlace = false;
+                            }
+                        }
+                        for (int i = 0; i < Width; i++)
+                        {
+                            if (Ref.grid.CheckTile(i + (int)Mathf.Round(mousePos.x), (int)Mathf.Round(mousePos.y) + Height) == 0 || Ref.grid.TileTypes[Ref.grid.CheckTile(i + (int)Mathf.Round(mousePos.x), (int)Mathf.Round(mousePos.y) + Height)].IsLiquid)
+                            {
+                                CanTopPlace = false;
+                            }
+                        }
+                        for (int i = 0; i < Height; i++)
+                        {
+                            if (Ref.grid.CheckTile((int)Mathf.Round(mousePos.x) - 1, i + (int)Mathf.Round(mousePos.y)) == 0 || Ref.grid.TileTypes[Ref.grid.CheckTile((int)Mathf.Round(mousePos.x) - 1, i + (int)Mathf.Round(mousePos.y))].IsLiquid)
+                            {
+                                CanLeftPlace = false;
+                            }
+                        }
+                        for (int i = 0; i < Height; i++)
+                        {
+                            if (Ref.grid.CheckTile((int)Mathf.Round(mousePos.x) + Width, i + (int)Mathf.Round(mousePos.y)) == 0 || Ref.grid.TileTypes[Ref.grid.CheckTile((int)Mathf.Round(mousePos.x) - Width, i + (int)Mathf.Round(mousePos.y))].IsLiquid)
+                            {
+                                CanRightPlace = false;
+                            }
+                        }
+                        for (int i = 0; i < Height; i++)
+                        {
+                            for (int j = 0; j < Width; j++)
+                            {
+                                if (Ref.grid.CheckBackTile(j + (int)Mathf.Round(mousePos.x), i + (int)Mathf.Round(mousePos.y)) == 0)
+                                {
+                                    CanBackPlace = false;
+                                }
+                            }
+                        }
+
+                        if (CanLeftPlace && LeftWallMount != null)
+                        {
+                            LeftWallMount.SetActive(true);
+                            GameObject NewPlaced = Instantiate(LeftWallMount, new Vector2(Mathf.Round(mousePos.x), Mathf.Round(mousePos.y)), Quaternion.Euler(0, 0, 0));
+                            Ref.grid.FurnitureIDS[(int)Mathf.Round(mousePos.x) + (int)Mathf.Round(mousePos.y) * Ref.grid.WorldWidth] = FurnitureID;
+                            ItemNum--;
+                            LeftWallMount.SetActive(false);
+                        }
+                        else if (CanRightPlace && RightWallMount != null)
+                        {
+                            RightWallMount.SetActive(true);
+                            GameObject NewPlaced = Instantiate(RightWallMount, new Vector2(Mathf.Round(mousePos.x), Mathf.Round(mousePos.y)), Quaternion.Euler(0, 0, 0));
+                            Ref.grid.FurnitureIDS[(int)Mathf.Round(mousePos.x) + (int)Mathf.Round(mousePos.y) * Ref.grid.WorldWidth] = FurnitureID;
+                            ItemNum--;
+                            RightWallMount.SetActive(false);
+                        }
+                        else if (CanGroundPlace && GroundPlaced != null)
+                        {
+                            GroundPlaced.SetActive(true);
+                            GameObject NewPlaced = Instantiate(GroundPlaced, new Vector2(Mathf.Round(mousePos.x), Mathf.Round(mousePos.y)), Quaternion.Euler(0, 0, 0));
+                            Ref.grid.FurnitureIDS[(int)Mathf.Round(mousePos.x) + (int)Mathf.Round(mousePos.y) * Ref.grid.WorldWidth] = FurnitureID;
+                            ItemNum--;
+                            GroundPlaced.SetActive(false);
+                        }
+                        else if (CanBackPlace && BackgroundMount != null)
+                        {
+                            BackgroundMount.SetActive(true);
+                            GameObject NewPlaced = Instantiate(BackgroundMount, new Vector2(Mathf.Round(mousePos.x), Mathf.Round(mousePos.y)), Quaternion.Euler(0, 0, 0));
+                            Ref.grid.FurnitureIDS[(int)Mathf.Round(mousePos.x) + (int)Mathf.Round(mousePos.y) * Ref.grid.WorldWidth] = FurnitureID;
+                            ItemNum--;
+                            BackgroundMount.SetActive(false);
+                        }
+                        else if (CanTopPlace && CeilingMount != null)
+                        {
+                            CeilingMount.SetActive(true);
+                            GameObject NewPlaced = Instantiate(CeilingMount, new Vector2(Mathf.Round(mousePos.x), Mathf.Round(mousePos.y)), Quaternion.Euler(0, 0, 0));
+                            Ref.grid.FurnitureIDS[(int)Mathf.Round(mousePos.x) + (int)Mathf.Round(mousePos.y) * Ref.grid.WorldWidth] = FurnitureID;
+                            ItemNum--;
+                            CeilingMount.SetActive(false);
+                        }
                     }
 
                     if (Input.GetKeyDown(KeyCode.E) && ArmorType > 0)
@@ -457,13 +677,23 @@ public class item : MonoBehaviour
 
                         PlayerS.RightItem = null;
                     }
-                    if (Input.GetKeyDown(KeyCode.E) && ESkill != null && ETimer <= 0 && EHold == false || Input.GetKey(KeyCode.E) && ESkill != null && ETimer <= 0 && EHold == true)
+                    if (Input.GetKeyDown(KeyCode.E) && ESkill != null && ETimer <= 0 && EHold == false && PlayerS.Mana - EManaCost >= 0 || Input.GetKey(KeyCode.E) && ESkill != null && ETimer <= 0 && EHold == true && PlayerS.Mana - EManaCost >= 0)
                     {
+                        PlayerS.Mana -= EManaCost;
+
+                        if (Consumable)
+                            ItemNum--;
+
                         Instantiate(ESkill, transform.position, transform.rotation).GetComponent<GetWeapon>().Creator = this;
                         ETimer = ECooldown;
                     }
-                    else if (Input.GetKeyDown(KeyCode.LeftShift) && ShiftSkill != null && ShiftTimer < 0 && ShiftHold == false || Input.GetKey(KeyCode.LeftShift) && ShiftSkill != null && ShiftTimer < 0 && ShiftHold == true)
+                    else if (Input.GetKeyDown(KeyCode.LeftShift) && ShiftSkill != null && ShiftTimer < 0 && ShiftHold == false && PlayerS.Mana - ShiftManaCost >= 0 || Input.GetKey(KeyCode.LeftShift) && ShiftSkill != null && ShiftTimer < 0 && ShiftHold == true && PlayerS.Mana - ShiftManaCost >= 0)
                     {
+                        PlayerS.Mana -= ShiftManaCost;
+
+                        if (Consumable)
+                            ItemNum--;
+
                         Instantiate(ShiftSkill, transform.position, transform.rotation).GetComponent<GetWeapon>().Creator = this;
                         ShiftTimer = ShiftCooldown;
                     }
@@ -559,19 +789,6 @@ public class item : MonoBehaviour
                     Sounds.enabled = false;
                 }
             }
-
-            Vector3 playerpos = new Vector3(cam.ScreenToWorldPoint(Input.mousePosition).x, cam.ScreenToWorldPoint(Input.mousePosition).y, 0);
-            Vector3 difference = playerpos - transform.position;
-            float rotationZ = Mathf.Atan2(difference.x, -difference.y) * Mathf.Rad2Deg;
-
-            if (Input.GetKey(KeyCode.Mouse0) && LeftHand == true && Held && speed > 0)
-            {
-                rb.MoveRotation(Mathf.LerpAngle(rb.rotation, rotationZ + offset, speed * Time.deltaTime));
-            }
-            else if (Input.GetKey(KeyCode.Mouse1) && LeftHand == false && Held && speed > 0)
-            {
-                rb.MoveRotation(Mathf.LerpAngle(rb.rotation, rotationZ + offset, speed * Time.deltaTime));
-            }
         }
 
         if (LeftHand && Grabable && Held)
@@ -592,14 +809,68 @@ public class item : MonoBehaviour
         }
     }
 
+    static Vector2 ComputeTotalImpulse(Collision2D collision)
+    {
+        Vector2 impulse = Vector2.zero;
+
+        int contactCount = collision.contactCount;
+        for (int i = 0; i < contactCount; i++)
+        {
+            var contact = collision.GetContact(i);
+            impulse += contact.normal * contact.normalImpulse;
+            impulse.x += contact.tangentImpulse * contact.normal.y;
+            impulse.y -= contact.tangentImpulse * contact.normal.x;
+        }
+
+        return impulse;
+    }
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        rb2 = collision.rigidbody;
+
+        Vector2 normal = collision.GetContact(0).normal;
+        Vector2 impulse = ComputeTotalImpulse(collision);
+
+        // Both bodies see the same impulse. Flip it for one of the bodies.
+        if (Vector3.Dot(normal, impulse) < 0f)
+            impulse *= -1f;
+
+        Vector2 myIncidentVelocity = rb2.velocity - impulse / rb2.mass;
+
+        Vector2 otherIncidentVelocity = Vector3.zero;
+        var otherBody = rb;
+
+        if (otherBody != null)
+        {
+            otherIncidentVelocity = otherBody.velocity;
+            if (!otherBody.isKinematic)
+                otherIncidentVelocity += impulse / otherBody.mass;
+        }
+
+        // Compute how fast each one was moving along the collision normal,
+        // Or zero if we were moving against the normal.
+        float myApproach = Mathf.Max(0f, Vector3.Dot(myIncidentVelocity, normal));
+        float otherApproach = Mathf.Max(0f, Vector3.Dot(otherIncidentVelocity, normal));
+
+        float damage = Mathf.Max(0f, otherApproach - myApproach - 1);
+
         if (Held && OnHitParts != null && !collision.gameObject.CompareTag("Ground") && !collision.gameObject.CompareTag("Item") && !collision.gameObject.CompareTag("Weapon"))
         {
             OnHitParts.Play();
+
+            if (damage >= HeavyForce && HeavySkill != null)
+            {
+                Instantiate(HeavySkill, transform.position, transform.rotation).GetComponent<GetWeapon>().Creator = this;
+            }
+
+            if (HitManaMod > 0)
+            {
+                PlayerS.Mana += damage * HitManaMod / 10;
+            }
         }
 
-        if (Grabable && PlayerS.Health > 0)
+        if (this != null && Grabable && PlayerS.Health > 0)
         {
             if (collision.gameObject.tag == "Left Hand" && Input.GetKey(KeyCode.Mouse0) && Held == false)
             {

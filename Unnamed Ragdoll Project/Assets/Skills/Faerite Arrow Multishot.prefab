@@ -15226,6 +15226,7 @@ GameObject:
   - component: {fileID: 4494958713681341517}
   - component: {fileID: 4494979472835587771}
   - component: {fileID: 7761355985674571418}
+  - component: {fileID: 4016955173057431554}
   m_Layer: 0
   m_Name: Arrow
   m_TagString: Untagged
@@ -15304,11 +15305,64 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TurnOn: {fileID: 7329376310360951038}
   CanCollide:
-    serializedVersion: 2
-    m_Bits: 3137
-  Size: 0.35
+  - Grab
+  - Enemy Weapon
+  - Grab Enemy Weapon
+  - Item
+  - Weapon
+  - Ground
   DamageMultiplyer: 6
   DealsDamage: 1
+  CanHeal: 0
+  Pierces: 1
+  InvinceTime: 0
+  Range: 10
+  HitObjects: []
+--- !u!61 &4016955173057431554
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3563808073886833998}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: -0.04, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 0.27, y: 1}
+  m_EdgeRadius: 0
 --- !u!1 &3603610529567827290
 GameObject:
   m_ObjectHideFlags: 0
@@ -15608,6 +15662,7 @@ GameObject:
   - component: {fileID: 5298039156321367883}
   - component: {fileID: 1974996230501774629}
   - component: {fileID: 8458829289403163364}
+  - component: {fileID: 8316459833184160814}
   m_Layer: 0
   m_Name: Arrow
   m_TagString: Untagged
@@ -15686,11 +15741,64 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TurnOn: {fileID: 3795814213363015321}
   CanCollide:
-    serializedVersion: 2
-    m_Bits: 3137
-  Size: 0.35
+  - Grab
+  - Enemy Weapon
+  - Grab Enemy Weapon
+  - Item
+  - Weapon
+  - Ground
   DamageMultiplyer: 6
   DealsDamage: 1
+  CanHeal: 0
+  Pierces: 1
+  InvinceTime: 0
+  Range: 10
+  HitObjects: []
+--- !u!61 &8316459833184160814
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4866734075139090449}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: -0.04, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 0.27, y: 1}
+  m_EdgeRadius: 0
 --- !u!1 &5685463227553505061
 GameObject:
   m_ObjectHideFlags: 0
@@ -15703,6 +15811,7 @@ GameObject:
   - component: {fileID: 5607023472316350156}
   - component: {fileID: 1409650208944273773}
   - component: {fileID: 3855170866334015000}
+  - component: {fileID: 7538031380696554929}
   m_Layer: 0
   m_Name: Arrow
   m_TagString: Untagged
@@ -15781,11 +15890,64 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TurnOn: {fileID: 1998107428995536375}
   CanCollide:
-    serializedVersion: 2
-    m_Bits: 3137
-  Size: 0.35
+  - Grab
+  - Enemy Weapon
+  - Grab Enemy Weapon
+  - Item
+  - Weapon
+  - Ground
   DamageMultiplyer: 6
   DealsDamage: 1
+  CanHeal: 0
+  Pierces: 1
+  InvinceTime: 0
+  Range: 10
+  HitObjects: []
+--- !u!61 &7538031380696554929
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5685463227553505061}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: -0.04, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0, y: 0}
+    oldSize: {x: 0, y: 0}
+    newSize: {x: 0, y: 0}
+    adaptiveTilingThreshold: 0
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 0.27, y: 1}
+  m_EdgeRadius: 0
 --- !u!1 &5849556190070307197
 GameObject:
   m_ObjectHideFlags: 0

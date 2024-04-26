@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 1834008939629166136}
   - component: {fileID: 2224386662539609838}
   - component: {fileID: 1751441440467183647}
+  - component: {fileID: 1305087829069990737}
   m_Layer: 0
   m_Name: Circle
   m_TagString: Untagged
@@ -142,11 +143,61 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   TurnOn: {fileID: 2276135973797572100}
   CanCollide:
-    serializedVersion: 2
-    m_Bits: 1
-  Size: 1.5
-  DamageMultiplyer: 10000
+  - Grab
+  - Enemy Weapon
+  - Grab Enemy Weapon
+  DamageMultiplyer: 3
   DealsDamage: 1
+  CanHeal: 0
+  Pierces: 100
+  InvinceTime: 1
+  Range: 10
+  HitObjects: []
+--- !u!61 &1305087829069990737
+BoxCollider2D:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1850939393696662106}
+  m_Enabled: 1
+  m_Density: 1
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_ForceSendLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ForceReceiveLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_ContactCaptureLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_CallbackLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_IsTrigger: 1
+  m_UsedByEffector: 0
+  m_UsedByComposite: 0
+  m_Offset: {x: 0, y: 0}
+  m_SpriteTilingProperty:
+    border: {x: 0, y: 0, z: 0, w: 0}
+    pivot: {x: 0.5, y: 0.5}
+    oldSize: {x: 4, y: 4}
+    newSize: {x: 1, y: 1}
+    adaptiveTilingThreshold: 0.5
+    drawMode: 0
+    adaptiveTiling: 0
+  m_AutoTiling: 0
+  serializedVersion: 2
+  m_Size: {x: 1.41, y: 4}
+  m_EdgeRadius: 0
 --- !u!1 &2276135973797572100
 GameObject:
   m_ObjectHideFlags: 0

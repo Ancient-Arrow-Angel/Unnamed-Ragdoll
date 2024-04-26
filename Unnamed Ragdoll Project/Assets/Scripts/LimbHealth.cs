@@ -147,6 +147,7 @@ public class LimbHealth : MonoBehaviour
             this.enabled = false;
         }
 
+        FlashAmount.r += 2 * Time.deltaTime;
         FlashAmount.g += 2 * Time.deltaTime;
         FlashAmount.b += 2 * Time.deltaTime;
         LimbSprite.color = FlashAmount;
@@ -206,7 +207,18 @@ public class LimbHealth : MonoBehaviour
 
         if (collision.transform.CompareTag("Weapon") || collision.transform.CompareTag("Enemy Weapon") || collision.transform.CompareTag("Grab Enemy Weapon"))
         {
-            if (collision.gameObject.GetComponent<item>().Held)
+            if (collision.gameObject.GetComponent<item>().HurtAll)
+            {
+                FlashAmount.b = 0;
+                FlashAmount.g = 0;
+
+                TakeDamage(damage * collision.gameObject.GetComponent<item>().HeavyDamage - Defence);
+                TakeDamage(damage * collision.gameObject.GetComponent<item>().LightDamage - Defence);
+                TakeDamage(damage * collision.gameObject.GetComponent<item>().MagicDamage - Defence);
+
+                rb.AddForce((transform.position - collision.transform.position).normalized * collision.gameObject.GetComponent<item>().Knockback);
+            }
+            else if (collision.gameObject.GetComponent<item>().Held)
             {
                 //Sound.volume = damage * 0.005f;
                 FlashAmount.b = 0;

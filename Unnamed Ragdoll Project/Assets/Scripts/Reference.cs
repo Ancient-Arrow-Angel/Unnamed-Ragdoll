@@ -9,6 +9,7 @@ public class Reference : MonoBehaviour
 {
     public List<ItemType> Items;
 
+    public CraftingMenu Craft;
     public SlotMaker Inventory;
     public TileMaker grid;
     public GameObject Bass;
@@ -16,6 +17,7 @@ public class Reference : MonoBehaviour
     public LayerMask PlayerMask;
     public LayerMask GroundMask;
     public LayerMask FurnitureMask;
+    public LayerMask ItemMask;
     public int TileRange;
     public int CameraSize;
 
@@ -27,9 +29,17 @@ public class Reference : MonoBehaviour
     public ArmorHandle Armor;
     public Player player;
 
+    public float ItemCombineRange;
+
+    public bool TilesChanged;
+    public float CraftingRange;
+    public int NonTileItems;
+
     private void Awake()
     {
         Physics2D.reuseCollisionCallbacks = true;
+
+        NonTileItems = Items.Count;
 
         Inventory = GameObject.Find("Slot Maker").GetComponent<SlotMaker>();
         grid = GameObject.Find("Grid").GetComponent<TileMaker>();
@@ -52,6 +62,32 @@ public class Reference : MonoBehaviour
             if (grid.TileTypes[i].Drop == null && !grid.TileTypes[i].DontDrop)
             {
                 grid.TileTypes[i].Drop = TileItem;
+            }
+        }
+
+        for (int i = 1; i < grid.FurnitureTypes.Length; i++)
+        {
+            grid.FurnitureTypes[i].FurnitureID = i;
+
+            if (grid.FurnitureTypes[i].LeftWallMount != null)
+            {
+                grid.FurnitureTypes[i].LeftWallMount.GetComponent<Furniture>().ID = i;
+            }
+            if (grid.FurnitureTypes[i].RightWallMount != null)
+            {
+                grid.FurnitureTypes[i].RightWallMount.GetComponent<Furniture>().ID = i;
+            }
+            if (grid.FurnitureTypes[i].GroundPlaced != null)
+            {
+                grid.FurnitureTypes[i].GroundPlaced.GetComponent<Furniture>().ID = i;
+            }
+            if (grid.FurnitureTypes[i].BackgroundMount != null)
+            {
+                grid.FurnitureTypes[i].BackgroundMount.GetComponent<Furniture>().ID = i;
+            }
+            if (grid.FurnitureTypes[i].CeilingMount != null)
+            {
+                grid.FurnitureTypes[i].CeilingMount.GetComponent<Furniture>().ID = i;
             }
         }
 
@@ -81,26 +117,7 @@ public class Reference : MonoBehaviour
 
     private void FixedUpdate()
     {
-        for (int i = 1; i < Items.Count; i++)
-        {
-            Items[i].Description = "\n";
 
-            if (Items[i].Item.GetComponent<item>().HeavyDamage > 0)
-                Items[i].Description += "\n" + (Items[i].Item.GetComponent<item>().HeavyDamage * player.DamageMultiplier * player.HeavyDamageMultiplier).ToString() + " Heavy Damage";
-            if (Items[i].Item.GetComponent<item>().LightDamage > 0)
-                Items[i].Description += "\n" + (Items[i].Item.GetComponent<item>().LightDamage * player.DamageMultiplier * player.LightDamageMultiplier).ToString() + " Light Damage";
-            if (Items[i].Item.GetComponent<item>().MagicDamage > 0)
-                Items[i].Description += "\n" + (Items[i].Item.GetComponent<item>().MagicDamage * player.DamageMultiplier * player.MagicDamageMultiplier).ToString() + " Magic Damage";
-
-            if (Items[i].Item.GetComponent<item>().MiningDamage > 0)
-            {
-                Items[i].Description += "\n" + Items[i].Item.GetComponent<item>().MiningDamage.ToString() + " Mining Damage";
-            }
-            if (Items[i].Item.GetComponent<item>().MiningPower > 0)
-            {
-                Items[i].Description += "\n" + Items[i].Item.GetComponent<item>().MiningPower.ToString() + " Mining Power";
-            }
-        }
     }
 
     public int CanAdd(int ID, int Amount)

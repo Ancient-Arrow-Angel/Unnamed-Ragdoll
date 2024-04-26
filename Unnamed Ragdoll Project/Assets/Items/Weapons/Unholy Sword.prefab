@@ -223,7 +223,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 0.11320752, g: 0.11320752, b: 0.11320752, a: 1}
+      maxColor: {r: 0, g: 0.059177637, b: 1, a: 1}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -287,7 +287,7 @@ ParticleSystem:
     startSize:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.08
+      scalar: 0.16
       minScalar: 1
       maxCurve:
         serializedVersion: 2
@@ -980,7 +980,7 @@ ParticleSystem:
       countCurve:
         serializedVersion: 2
         minMaxState: 0
-        scalar: 10
+        scalar: 20
         minScalar: 30
         maxCurve:
           serializedVersion: 2
@@ -1034,7 +1034,7 @@ ParticleSystem:
       repeatInterval: 0.01
       probability: 1
   SizeModule:
-    enabled: 0
+    enabled: 1
     curve:
       serializedVersion: 2
       minMaxState: 1
@@ -1047,20 +1047,29 @@ ParticleSystem:
           time: 0
           value: 0
           inSlope: 0
-          outSlope: 1
-          tangentMode: 0
-          weightedMode: 0
-          inWeight: 0.33333334
-          outWeight: 0.33333334
-        - serializedVersion: 3
-          time: 1
-          value: 1
-          inSlope: 1
           outSlope: 0
           tangentMode: 0
           weightedMode: 0
           inWeight: 0.33333334
           outWeight: 0.33333334
+        - serializedVersion: 3
+          time: 0.10802671
+          value: 1
+          inSlope: 0
+          outSlope: 0
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0.33333334
+          outWeight: 0.1238184
+        - serializedVersion: 3
+          time: 1
+          value: 0
+          inSlope: -5.0260534
+          outSlope: -5.0260534
+          tangentMode: 0
+          weightedMode: 0
+          inWeight: 0.07333469
+          outWeight: 0.3643245
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
@@ -1196,7 +1205,7 @@ ParticleSystem:
         m_RotationOrder: 4
     separateAxes: 0
   RotationModule:
-    enabled: 0
+    enabled: 1
     x:
       serializedVersion: 2
       minMaxState: 0
@@ -1306,7 +1315,7 @@ ParticleSystem:
     curve:
       serializedVersion: 2
       minMaxState: 0
-      scalar: 0.7853982
+      scalar: 12.217304
       minScalar: 0.7853982
       maxCurve:
         serializedVersion: 2
@@ -1358,7 +1367,7 @@ ParticleSystem:
         m_RotationOrder: 4
     separateAxes: 0
   ColorModule:
-    enabled: 1
+    enabled: 0
     gradient:
       serializedVersion: 2
       minMaxState: 1
@@ -4986,7 +4995,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Target: {fileID: 4076748917937810306}
-  Speed: 0.15
+  Speed: 0.6
 --- !u!1 &4183719684954570536
 GameObject:
   m_ObjectHideFlags: 0
@@ -5085,7 +5094,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Target: {fileID: 7093806281219088508}
-  Speed: 0.15
+  Speed: 0.6
 --- !u!1 &6444631066822865904
 GameObject:
   m_ObjectHideFlags: 0
@@ -10032,7 +10041,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Target: {fileID: 4375348351813658050}
-  Speed: 0.15
+  Speed: 0.6
 --- !u!1 &7087309708196121881
 GameObject:
   m_ObjectHideFlags: 0
@@ -10172,24 +10181,29 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4daf9a62e6c7f841b863dc64f235bfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ItemID: 2
+  ItemID: 0
   BlockID: 0
   MiningDamage: 0
   MiningPower: -100
   MiningCooldown: 0
   HeavyDamage: 0
-  LightDamage: 12
-  MagicDamage: 15
+  LightDamage: 4
+  MagicDamage: 10
   Knockback: 50
+  HitManaMod: 2
   HeavyDamageMod: 1
   LightDamageMod: 1
   MagicDamageMod: 1
   ESkill: {fileID: 6778040958929954361, guid: fa78465f183d97346b069cac2ffc0d7b, type: 3}
   ECooldown: 1
+  EManaCost: 2
   EHold: 1
   ShiftSkill: {fileID: 0}
   ShiftCooldown: 0
+  ShiftManaCost: 0
   ShiftHold: 0
+  HeavySkill: {fileID: 0}
+  HeavyForce: 0
   ArmorType: 0
   Defence: 0
   Health: 0
@@ -10205,12 +10219,14 @@ MonoBehaviour:
   RightWallMount: {fileID: 0}
   BackgroundMount: {fileID: 0}
   CeilingMount: {fileID: 0}
+  Consumable: 0
   Grabable: 1
+  HurtAll: 0
   ItemNum: 1
   Held: 0
   LeftHand: 1
   HandS: {fileID: 0}
-  speed: 150
+  speed: 11
   PlayerS: {fileID: 0}
   OnHitParts: {fileID: 4629420321805137447}
 --- !u!61 &4291347385569083746

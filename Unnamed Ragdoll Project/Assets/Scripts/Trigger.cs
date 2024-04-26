@@ -7,11 +7,12 @@ public class Trigger : MonoBehaviour
     public Animator animator;
     public string AnimName;
 
-    void OnCollisionEnter2D(Collision2D coll)
+    void OnTriggerEnter2D(Collider2D coll)
     {
         if (coll.transform.CompareTag("Player"))
         {
-            animator.Play(AnimName);
+            animator.SetTrigger(AnimName);
+            Destroy(gameObject);
         }
     }
 }

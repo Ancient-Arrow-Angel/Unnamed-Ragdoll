@@ -8,6 +8,6 @@ public class Destroy : MonoBehaviour
 
     void Start()
     {
-        Destroy(gameObject, DestroyTime);
+        Destroy(this.gameObject, DestroyTime);
     }
 }

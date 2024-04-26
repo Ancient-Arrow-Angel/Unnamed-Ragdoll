@@ -223,7 +223,7 @@ ParticleSystem:
       serializedVersion: 2
       minMaxState: 0
       minColor: {r: 1, g: 1, b: 1, a: 1}
-      maxColor: {r: 0.7254902, g: 0.60784316, b: 0.08235294, a: 1}
+      maxColor: {r: 0.87843144, g: 0.87843144, b: 0.87843144, a: 1}
       maxGradient:
         serializedVersion: 2
         key0: {r: 1, g: 1, b: 1, a: 1}
@@ -980,7 +980,7 @@ ParticleSystem:
       countCurve:
         serializedVersion: 2
         minMaxState: 0
-        scalar: 20
+        scalar: 5
         minScalar: 30
         maxCurve:
           serializedVersion: 2
@@ -5023,7 +5023,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4daf9a62e6c7f841b863dc64f235bfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ItemID: 2
+  ItemID: 0
   BlockID: 0
   MiningDamage: 0
   MiningPower: -100
@@ -5032,12 +5032,20 @@ MonoBehaviour:
   LightDamage: 0
   MagicDamage: 0
   Knockback: 700
+  HitManaMod: 0
+  HeavyDamageMod: 0
+  LightDamageMod: 0
+  MagicDamageMod: 0
   ESkill: {fileID: 0}
   ECooldown: 0
+  EManaCost: 0
   EHold: 0
   ShiftSkill: {fileID: 0}
   ShiftCooldown: 0
+  ShiftManaCost: 0
   ShiftHold: 0
+  HeavySkill: {fileID: 0}
+  HeavyForce: 0
   ArmorType: 0
   Defence: 0
   Health: 0
@@ -5053,10 +5061,15 @@ MonoBehaviour:
   RightWallMount: {fileID: 0}
   BackgroundMount: {fileID: 0}
   CeilingMount: {fileID: 0}
+  Consumable: 0
   Grabable: 1
+  HurtAll: 0
   ItemNum: 1
   Held: 0
-  speed: 200
+  LeftHand: 1
+  HandS: {fileID: 0}
+  speed: 15
+  PlayerS: {fileID: 0}
   OnHitParts: {fileID: 4629420321805137447}
 --- !u!61 &4291347385569083746
 BoxCollider2D:
@@ -5115,7 +5128,7 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 20
+  m_Mass: 18
   m_LinearDrag: 0
   m_AngularDrag: 0.05
   m_GravityScale: 1

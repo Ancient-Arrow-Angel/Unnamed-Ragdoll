@@ -14,7 +14,7 @@ public class DelayFollow : MonoBehaviour
     }
 
     // Update is called once per frame
-    void Update()
+    void FixedUpdate()
     {
         if(Target == null)
         {

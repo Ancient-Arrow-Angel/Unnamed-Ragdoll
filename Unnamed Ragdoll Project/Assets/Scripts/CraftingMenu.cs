@@ -65,6 +65,22 @@ public class CraftingMenu : MonoBehaviour
             CraftIcons[i].color = new Color(255, 255, 255, 0);
             CraftNums[i].text = "";
         }
+
+        for (int i = 0; i < Crafts.Length; i++)
+        {
+            if (Crafts[i].IsIDTile)
+            {
+                Crafts[i].CreatedID += Ref.NonTileItems -1;
+            }
+
+            for (int j = 0; j < Crafts[i].Costs.Length; j++)
+            {
+                if (Crafts[i].Costs[j].IsIDTile)
+                {
+                    Crafts[i].Costs[j].CostID += Ref.NonTileItems -1;
+                }
+            }
+        }
     }
 
     // Update is called once per frame
@@ -77,6 +93,12 @@ public class CraftingMenu : MonoBehaviour
         {
             ActuallyCraftable.Add(item);
         }
+        foreach (var item in Craftable)
+        {
+            ActuallyCraftable.Add(item);
+        }
+
+        Craftable.Clear();
 
         List<int> ToRemove = new List<int>();
         for (int i = 0; i < ActuallyCraftable.Count; i++)
@@ -300,6 +322,7 @@ public class Craft
 {
     public int CreatedID;
     public int CreatedAmount;
+    public bool IsIDTile;
     public Cost[] Costs;
 }
 
@@ -308,4 +331,5 @@ public class Cost
 {
     public int CostID;
     public int CostAmount;
+    public bool IsIDTile;
 }

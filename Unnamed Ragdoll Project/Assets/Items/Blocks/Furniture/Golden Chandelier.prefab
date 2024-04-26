@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 435380927789390196}
   - component: {fileID: 6484528402990871544}
+  - component: {fileID: 4534992877165155858}
   m_Layer: 10
   m_Name: Ceiling Placed
   m_TagString: Untagged
@@ -79,6 +80,21 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1.26, y: 0.63}
   m_EdgeRadius: 0
+--- !u!114 &4534992877165155858
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 227259496832110995}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 44d575445cada1e46adfbcdd6162828d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ID: 2
+  Craftable: 
+  Ref: {fileID: 0}
 --- !u!1 &457310499392017256
 GameObject:
   m_ObjectHideFlags: 0
@@ -123,9 +139,9 @@ GameObject:
   - component: {fileID: 3766869841541785141}
   - component: {fileID: 1145013861913426952}
   - component: {fileID: 1594800473405614474}
-  m_Layer: 11
+  m_Layer: 12
   m_Name: Golden Chandelier
-  m_TagString: Weapon
+  m_TagString: Item
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -160,7 +176,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a4daf9a62e6c7f841b863dc64f235bfd, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ItemID: 3
+  ItemID: 0
   BlockID: 0
   MiningDamage: -100
   MiningPower: -100
@@ -169,18 +185,26 @@ MonoBehaviour:
   LightDamage: 0
   MagicDamage: 0
   Knockback: 0
+  HitManaMod: 0
+  HeavyDamageMod: 1
+  LightDamageMod: 1
+  MagicDamageMod: 1
   ESkill: {fileID: 0}
   ECooldown: 0
+  EManaCost: 0
   EHold: 0
   ShiftSkill: {fileID: 0}
   ShiftCooldown: 0
+  ShiftManaCost: 0
   ShiftHold: 0
+  HeavySkill: {fileID: 0}
+  HeavyForce: 0
   ArmorType: 0
   Defence: 0
   Health: 0
   ArmorSprites: []
   IsFurniture: 1
-  FurnitureID: 0
+  FurnitureID: 2
   Width: 2
   Height: 1
   GhostObject: {fileID: 457310499392017256}
@@ -190,10 +214,15 @@ MonoBehaviour:
   RightWallMount: {fileID: 0}
   BackgroundMount: {fileID: 0}
   CeilingMount: {fileID: 227259496832110995}
+  Consumable: 0
   Grabable: 1
+  HurtAll: 0
   ItemNum: 1
   Held: 0
-  speed: 100
+  LeftHand: 1
+  HandS: {fileID: 0}
+  speed: 10
+  PlayerS: {fileID: 0}
   OnHitParts: {fileID: 0}
 --- !u!61 &1145013861913426952
 BoxCollider2D:
@@ -252,7 +281,7 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 2
+  m_Mass: 3
   m_LinearDrag: 0
   m_AngularDrag: 0.05
   m_GravityScale: 1

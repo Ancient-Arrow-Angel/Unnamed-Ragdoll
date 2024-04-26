@@ -45,6 +45,7 @@ public class TileTemplate : MonoBehaviour
             }
 
             TileIDS[i] = TileID;
+            TileID = 0;
 
             for (int j = 1; j < tileMaker.TileTypes.Length; j++)
             {

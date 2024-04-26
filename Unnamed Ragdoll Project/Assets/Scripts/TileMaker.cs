@@ -43,6 +43,7 @@ public class TileMaker : MonoBehaviour
     public float FrontTreeChance_FW;
 
     public TileTemplate[] FairyWoodsTrees_FW;
+    public TileTemplate[] FairyWoodsBackTrees_FW;
 
     [Header("Lost Desert")]
     public int MinEnd_LD;
@@ -67,6 +68,8 @@ public class TileMaker : MonoBehaviour
     public TileTemplate PiramidEntrance_Right_LD;
     public TileTemplate PiramidEntrance_Left_LD;
 
+    public TileTemplate[] Level1PiramidRooms_LD;
+
     [Header("Waterfall Mountain")]
     public int MinEnd_WM;
     public int MaxEnd_WM;
@@ -76,13 +79,12 @@ public class TileMaker : MonoBehaviour
 
     public int SnowHeight_WM;
 
+    [Range(0, 101)]
+    public float SapphireChance_WM;
+
     [Header("Graveyard")]
     public int MinEnd_G;
     public int MaxEnd_G;
-
-
-    [Range(0, 101)]
-    public float SapphireChance_WM;
 
     [Header("Furniture")]
     public item[] FurnitureTypes;
@@ -113,6 +115,11 @@ public class TileMaker : MonoBehaviour
         }
 
         FurnitureIDS = new int[FrontTileIDS.Length];
+
+        for (int i = 0; i < FurnitureIDS.Length; i++)
+        {
+            FurnitureIDS[i] = new int();
+        }
 
         GenerateWorld();
 
@@ -185,21 +192,20 @@ public class TileMaker : MonoBehaviour
                 }
             }
 
-            for (int j = 0; j < WorldHeight; j++)
+            if (i - 20 > WorldWidth / 2 || i + 20 < WorldWidth / 2)
             {
-                if (CheckTile(i, j) == 31)
+                for (int j = 0; j < WorldHeight; j++)
                 {
-                    //if (Random.Range(0f, 101f) <= BackTreeChance_FW)
-                    //{
-                    //    for (int h = 0; h < Random.Range(MinTreeHeight_FW, MaxTreeHeight_FW); h++)
-                    //    {
-                    //        SetTileA(i, j + 1 + h, 6, false);
-                    //    }
-                    //}
-                    if (Random.Range(0f, 101f) <= FrontTreeChance_FW)
+                    if (CheckTile(i, j) == 31)
                     {
-                        int Rand = Random.Range(0, FairyWoodsTrees_FW.Length);
-                        UseTemplate(FairyWoodsTrees_FW[Rand], i, j + 1);
+                        if (Random.Range(0f, 101f) <= BackTreeChance_FW)
+                        {
+                            UseTemplate(FairyWoodsBackTrees_FW[Random.Range(0, FairyWoodsBackTrees_FW.Length)], i, j + 1);
+                        }
+                        if (Random.Range(0f, 101f) <= FrontTreeChance_FW)
+                        {
+                            UseTemplate(FairyWoodsTrees_FW[Random.Range(0, FairyWoodsTrees_FW.Length)], i, j + 1);
+                        }
                     }
                 }
             }
@@ -208,7 +214,7 @@ public class TileMaker : MonoBehaviour
         {
             if (CheckTile(WorldWidth / 2, j) == 31)
             {
-                UseTemplate(StartingArea_FW, WorldWidth / 2, j - 3);
+                UseTemplate(StartingArea_FW, WorldWidth / 2, j +10);
             }
         }
 
@@ -286,31 +292,31 @@ public class TileMaker : MonoBehaviour
             if (i == (End - Start) / 2 + Start)
             {
                 for(int j = 0; j < PiramidWidth; j++)
-                    SetTileA(i, PiramidStartHeight + j, 37, true);
+                    SetTileA(i, PiramidStartHeight + j, 40, true);
                 
                 for (int j = 1; j < PiramidWidth; j++)
                     for (int h = 0; h < PiramidWidth; h++)
                         if(PiramidStartHeight + h - j >= PiramidStartHeight)
-                            SetTileA(i-j, PiramidStartHeight + h - j, 37, true);
+                            SetTileA(i-j, PiramidStartHeight + h - j, 40, true);
 
                 for (int j = 1; j < PiramidWidth; j++)
                     for (int h = 0; h < PiramidWidth; h++)
                         if (PiramidStartHeight + h - j >= PiramidStartHeight)
-                            SetTileA(i + j, PiramidStartHeight + h - j, 37, true);
+                            SetTileA(i + j, PiramidStartHeight + h - j, 40, true);
 
 
                 for (int j = 0; j < PiramidWidth; j++)
-                    SetTileA(i, PiramidStartHeight + j, 37, false);
+                    SetTileA(i, PiramidStartHeight + j, 40, false);
 
                 for (int j = 1; j < PiramidWidth; j++)
                     for (int h = 0; h < PiramidWidth; h++)
                         if (PiramidStartHeight + h - j >= PiramidStartHeight)
-                            SetTileA(i - j, PiramidStartHeight + h - j, 37, false);
+                            SetTileA(i - j, PiramidStartHeight + h - j, 40, false);
 
                 for (int j = 1; j < PiramidWidth; j++)
                     for (int h = 0; h < PiramidWidth; h++)
                         if (PiramidStartHeight + h - j >= PiramidStartHeight)
-                            SetTileA(i + j, PiramidStartHeight + h - j, 37, false);
+                            SetTileA(i + j, PiramidStartHeight + h - j, 40, false);
 
                 if(Random.Range(0, 2) == 0)
                 {
@@ -320,6 +326,8 @@ public class TileMaker : MonoBehaviour
                 {
                     UseTemplate(PiramidEntrance_Left_LD, i - 9, PiramidStartHeight + PiramidWidth - 17);
                 }
+
+                UseTemplate(Level1PiramidRooms_LD[Random.Range(0, Level1PiramidRooms_LD.Length)], i, PiramidStartHeight + PiramidWidth - 27);
             }
         }
 
@@ -369,10 +377,45 @@ public class TileMaker : MonoBehaviour
                 }
             }
         }
+
+
+        //if(Random.Range(0, 2) == 0)
+        //{
+
+        //}
+        //else
+        //{
+
+        //}
+
+        //for (int i = Start; i < End; i++)
+        //{
+        //    for (int j = 0; j < WorldHeight; j++)
+        //    {
+        //        if (CheckTile(i, j) == 3)
+        //        {
+        //            SetTileA(i, j, 5, true);
+        //        }
+        //        else if (CheckTile(i, j) == 2)
+        //        {
+        //            SetTileA(i, j, 4, true);
+        //        }
+        //    }
+        //}
+
+        //for (int i = 0; i < WorldWidth; i++)
+        //{
+        //    for (int j = 0; j < WorldHeight; j++)
+        //    {
+        //        SetTileA(i, j, 22, false);
+        //    }
+        //}
     }
 
     void FixedUpdate()
     {
+        Ref.TilesChanged = true;
+
         if (player.rb.transform.position.x > LastPos.x + Ref.ChunkSize ||
             player.rb.transform.position.x < LastPos.x - Ref.ChunkSize ||
             player.rb.transform.position.y > LastPos.y + Ref.ChunkSize ||
@@ -390,17 +433,17 @@ public class TileMaker : MonoBehaviour
         for (int i = 0; i < Temp.TileIDS.Length; i++)
         {
             if (Temp.FrontRemove[i] == true)
-                SetTileA(i % Temp.Width + x, i / Temp.Width + y, 0, true);
+                SetTileA(i % Temp.Width + x + Temp.XOffset, i / Temp.Width + y + Temp.YOffset, 0, true);
 
             if (Temp.BackRemove[i] == true)
-                SetTileA(i % Temp.Width + x, i / Temp.Width + y, 0, false);
+                SetTileA(i % Temp.Width + x + Temp.XOffset, i / Temp.Width + y + Temp.YOffset, 0, false);
 
 
-            if (Temp.TileIDS[i] != 0)
-                SetTileA(i % Temp.Width + x, i / Temp.Width + y, Temp.TileIDS[i], true);
+            if (Temp.TileIDS[i] > 0)
+                SetTileA(i % Temp.Width + x + Temp.XOffset, i / Temp.Width + y + Temp.YOffset, Temp.TileIDS[i], true);
 
-            if (Temp.BackTileIDS[i] != 0)
-                SetTileA(i % Temp.Width + x, i / Temp.Width + y, Temp.BackTileIDS[i], false);
+            if (Temp.BackTileIDS[i] > 0)
+                SetTileA(i % Temp.Width + x + Temp.XOffset, i / Temp.Width + y + Temp.YOffset, Temp.BackTileIDS[i], false);
         }
     }
 
@@ -423,6 +466,8 @@ public class TileMaker : MonoBehaviour
                 }
                 else if (FrontTileIDS[i].Health <= 0)
                 {
+                    Ref.TilesChanged = true;
+
                     Instantiate(TileTypes[FrontTileIDS[i].ID].BreakParticles, new Vector2(i % WorldWidth, i / WorldWidth), transform.rotation);
                     Instantiate(TileTypes[FrontTileIDS[i].ID].BreakParticles, new Vector2(i % WorldWidth, i / WorldWidth), transform.rotation);
                     Instantiate(TileTypes[FrontTileIDS[i].ID].BreakParticles, new Vector2(i % WorldWidth, i / WorldWidth), transform.rotation);
@@ -479,6 +524,8 @@ public class TileMaker : MonoBehaviour
 
     public void SetTileA(int X, int Y, int ID, bool IsFront)
     {
+        Ref.TilesChanged = true;
+
         if (IsFront)
         {
             FrontTileIDS[X + Y * WorldWidth].ID = ID;
@@ -491,76 +538,63 @@ public class TileMaker : MonoBehaviour
         }
     }
 
-    //public void RwfreshFoliage()
-    //{
-    //    for(int i = -Ref.CameraSize + (int)Mathf.Round(player.rb.transform.position.x); i < Ref.CameraSize + (int)Mathf.Round(player.rb.transform.position.x); i++)
-    //    {
-    //        for (int j = -Ref.CameraSize + (int)Mathf.Round(player.rb.transform.position.y); j < Ref.CameraSize + (int)Mathf.Round(player.rb.transform.position.y); j++)
-    //        {
-    //            if (CheckTile(i, j - 1) > 0 && CheckTile(i, j) == 0 && !Physics2D.OverlapCircle(new Vector2(i, j - 0.5f), 0.45f, Ref.FoliageMask))
-    //            {
-    //                if(TileTypes[CheckTile(i, j - 1)].Foliage.Length > 0)
-    //                {
-    //                    Instantiate(TileTypes[CheckTile(i, j - 1)].Foliage[0], new Vector2(i, j - 0.5f), transform.rotation);
-    //                }
-    //            }
-    //        }
-    //    }
-    //}
-
     public void RefreshRange()
     {
-        for (int i = 0; i < WorldHeight; i++)
+        Ref.TilesChanged = true;
+
+        for (int i = (int)Mathf.Round(player.rb.transform.position.y) - Ref.TileRange / 2; i < (int)Mathf.Round(player.rb.transform.position.y) + Ref.TileRange / 2; i++)
         {
-            for (int j = 0; j < WorldWidth; j++)
+            for (int j = (int)Mathf.Round(player.rb.transform.position.x) - Ref.TileRange / 2; j < (int)Mathf.Round(player.rb.transform.position.x) + Ref.TileRange / 2; j++)
             {
                 if (FurnitureIDS[j + i * WorldWidth] > 0)
                 {
                     bool SpaceEmpty = true;
 
-                    //for (int k = 0; k < FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].Height; k++)
-                    //{
-                    //    for (int y = 0; y < FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].Width; y++)
-                    //    {
-                    //        if (Physics2D.OverlapCircle(new Vector2(j + y, i + k), 0.45f, Ref.FurnitureMask))
-                    //        {
-                    //            SpaceEmpty = false;
-                    //        }
-                    //    }
-                    //}
+                    for (int k = 0; k < FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].Height; k++)
+                    {
+                        for (int y = 0; y < FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].Width; y++)
+                        {
+                            if (Physics2D.OverlapCircle(new Vector2(j + y, i + k), 0.45f, Ref.FurnitureMask))
+                            {
+                                SpaceEmpty = false;
+                            }
+                        }
+                    }
 
                     if (SpaceEmpty)
                     {
-                        Debug.Log("Space Empty!");
-                        if (FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].GroundPlaced != null)
+                        if (FurnitureTypes[FurnitureIDS[j + i * WorldWidth]] != null)
                         {
-                            FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].GroundPlaced.SetActive(true);
-                            Instantiate(FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].GroundPlaced, new Vector2(j, i), transform.rotation);
-                            FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].GroundPlaced.SetActive(false);
-                        }
-                        else if (FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].LeftWallMount != null)
-                        {
-                            FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].LeftWallMount.SetActive(true);
-                            Instantiate(FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].LeftWallMount, new Vector2(j, i), transform.rotation);
-                            FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].LeftWallMount.SetActive(false);
-                        }
-                        else if (FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].RightWallMount != null)
-                        {
-                            FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].RightWallMount.SetActive(true);
-                            Instantiate(FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].RightWallMount, new Vector2(j, i), transform.rotation);
-                            FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].RightWallMount.SetActive(false);
-                        }
-                        else if (FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].CeilingMount != null)
-                        {
-                            FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].CeilingMount.SetActive(true);
-                            Instantiate(FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].CeilingMount, new Vector2(j, i), transform.rotation);
-                            FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].CeilingMount.SetActive(false);
-                        }
-                        else if (FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].BackgroundMount != null)
-                        {
-                            FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].BackgroundMount.SetActive(true);
-                            Instantiate(FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].BackgroundMount, new Vector2(j, i), transform.rotation);
-                            FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].BackgroundMount.SetActive(false);
+                            if (FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].GroundPlaced != null)
+                            {
+                                FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].GroundPlaced.SetActive(true);
+                                Instantiate(FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].GroundPlaced, new Vector2(j, i), transform.rotation);
+                                FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].GroundPlaced.SetActive(false);
+                            }
+                            else if (FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].LeftWallMount != null)
+                            {
+                                FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].LeftWallMount.SetActive(true);
+                                Instantiate(FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].LeftWallMount, new Vector2(j, i), transform.rotation);
+                                FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].LeftWallMount.SetActive(false);
+                            }
+                            else if (FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].RightWallMount != null)
+                            {
+                                FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].RightWallMount.SetActive(true);
+                                Instantiate(FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].RightWallMount, new Vector2(j, i), transform.rotation);
+                                FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].RightWallMount.SetActive(false);
+                            }
+                            else if (FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].CeilingMount != null)
+                            {
+                                FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].CeilingMount.SetActive(true);
+                                Instantiate(FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].CeilingMount, new Vector2(j, i), transform.rotation);
+                                FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].CeilingMount.SetActive(false);
+                            }
+                            else if (FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].BackgroundMount != null)
+                            {
+                                FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].BackgroundMount.SetActive(true);
+                                Instantiate(FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].BackgroundMount, new Vector2(j, i), transform.rotation);
+                                FurnitureTypes[FurnitureIDS[j + i * WorldWidth]].BackgroundMount.SetActive(false);
+                            }
                         }
                     }
                 }
@@ -629,6 +663,8 @@ public class TileMaker : MonoBehaviour
                 Instantiate(TileTypes[FrontTileIDS[x + y * WorldWidth].ID].BreakParticles, new Vector2(x, y), transform.rotation);
                 Instantiate(TileTypes[FrontTileIDS[x + y * WorldWidth].ID].BreakParticles, new Vector2(x, y), transform.rotation);
 
+                Ref.TilesChanged = true;
+
                 if(TileTypes[FrontTileIDS[x + y * WorldWidth].ID].Drop != null)
                 {
                     if (Ref.CanAdd(TileTypes[FrontTileIDS[x + y * WorldWidth].ID].Drop.GetComponent<item>().ItemID, 1) > 0)
@@ -660,6 +696,8 @@ public class TileMaker : MonoBehaviour
             }
             else if (BackTileIDS[x + y * WorldWidth].Health <= 0)
             {
+                Ref.TilesChanged = true;
+
                 Instantiate(TileTypes[BackTileIDS[x + y * WorldWidth].ID].BreakParticles, new Vector2(x, y), transform.rotation);
                 Instantiate(TileTypes[BackTileIDS[x + y * WorldWidth].ID].BreakParticles, new Vector2(x, y), transform.rotation);
                 Instantiate(TileTypes[BackTileIDS[x + y * WorldWidth].ID].BreakParticles, new Vector2(x, y), transform.rotation);
@@ -696,6 +734,8 @@ public class TileMaker : MonoBehaviour
 
     public void SetTile(int X, int Y, int ID, bool IsFront)
     {
+        Ref.TilesChanged = true;
+
         if (IsFront)
         {
             FrontTileIDS[X + Y * WorldWidth].ID = (byte)ID;

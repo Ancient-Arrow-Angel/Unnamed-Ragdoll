@@ -1,5 +1,4 @@
 using TMPro;
-using UnityEditor;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -16,6 +15,12 @@ public class Player : MonoBehaviour
     public TileMaker TileS;
 
     [Header("Base Stats")]
+    public float MaxHealth = 100;
+    public float Health;
+    public float Mana;
+    public float MaxMana;
+    public float ManaRegen;
+
     public float MiningCooldown;
     public int MiningDamage;
     public int MiningPower;
@@ -45,10 +50,9 @@ public class Player : MonoBehaviour
     public int LeftID;
     public int RightID;
 
-
-    public float MaxHealth = 100;
-    public float Health;
+    [Header("Other")]
     public TextMeshProUGUI HealthPercent;
+    public TextMeshProUGUI ManaNum;
 
     public GameObject Menu;
 
@@ -95,6 +99,8 @@ public class Player : MonoBehaviour
     public Grab LeftHand;
     public Grab RightHand;
 
+    bool once;
+
     void Awake() 
     {
         ChestMenus = new GameObject[ChestMenu.transform.GetComponentsInChildren<RectTransform>().Length -1];
@@ -104,18 +110,10 @@ public class Player : MonoBehaviour
         }
 
         Health = MaxHealth;
+        Mana = MaxMana;
 
         TileS.enabled = true;
         //transform.position = new Vector3(TileS.WorldWidth / 2, TileS.WorldHeight + 2);
-
-        colliders = transform.GetComponentsInChildren<Collider2D>();
-        for (int i = 0; i < colliders.Length; i++)
-        {
-            for (int k = i; k < colliders.Length; k++)
-            {
-                Physics2D.IgnoreCollision(colliders[i], colliders[k]);
-            }
-        }
 
         LeftLeg.GetComponent<HingeJoint2D>().useLimits = false;
         RightLeg.GetComponent<HingeJoint2D>().useLimits = false;
@@ -126,6 +124,19 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!once)
+        {
+            colliders = transform.GetComponentsInChildren<Collider2D>();
+            for (int i = 0; i < colliders.Length; i++)
+            {
+                for (int k = i; k < colliders.Length; k++)
+                {
+                    Physics2D.IgnoreCollision(colliders[i], colliders[k]);
+                }
+            }
+            once = true;
+        }
+
         if(LeftItem != null)
         {
             if (LeftItem.ESkill != null)
@@ -189,6 +200,10 @@ public class Player : MonoBehaviour
             RightShiftCool.transform.parent.GetComponent<Image>().color = Color.clear;
         }
 
+        Mana += Time.deltaTime * ManaRegen;
+        if(Mana > MaxMana)
+            Mana = MaxMana;
+        ManaNum.text = Mathf.Round(Mana).ToString() + " / " + MaxMana.ToString();
 
         FailCooldown -= Time.deltaTime;
 

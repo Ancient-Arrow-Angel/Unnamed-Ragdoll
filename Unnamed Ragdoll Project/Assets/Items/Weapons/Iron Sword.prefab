@@ -5032,15 +5032,20 @@ MonoBehaviour:
   LightDamage: 0
   MagicDamage: 0
   Knockback: 100
+  HitManaMod: 0
   HeavyDamageMod: 0
   LightDamageMod: 0
   MagicDamageMod: 0
   ESkill: {fileID: 0}
   ECooldown: 0
+  EManaCost: 0
   EHold: 0
   ShiftSkill: {fileID: 0}
   ShiftCooldown: 0
+  ShiftManaCost: 0
   ShiftHold: 0
+  HeavySkill: {fileID: 0}
+  HeavyForce: 0
   ArmorType: 0
   Defence: 0
   Health: 0
@@ -5056,10 +5061,14 @@ MonoBehaviour:
   RightWallMount: {fileID: 0}
   BackgroundMount: {fileID: 0}
   CeilingMount: {fileID: 0}
+  Consumable: 0
   Grabable: 1
+  HurtAll: 0
   ItemNum: 1
   Held: 0
-  speed: 80
+  LeftHand: 1
+  HandS: {fileID: 0}
+  speed: 10
   PlayerS: {fileID: 0}
   OnHitParts: {fileID: 4629420321805137447}
 --- !u!61 &4291347385569083746

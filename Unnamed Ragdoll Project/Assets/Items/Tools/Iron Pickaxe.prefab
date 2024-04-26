@@ -172,18 +172,26 @@ MonoBehaviour:
   ItemID: 1
   BlockID: 0
   MiningDamage: 25
-  MiningPower: 3
+  MiningPower: 2
   MiningCooldown: 0
   HeavyDamage: 3
   LightDamage: 0
   MagicDamage: 0
   Knockback: 0
+  HitManaMod: 0
+  HeavyDamageMod: 1
+  LightDamageMod: 1
+  MagicDamageMod: 1
   ESkill: {fileID: 0}
   ECooldown: 0
+  EManaCost: 0
   EHold: 0
   ShiftSkill: {fileID: 0}
   ShiftCooldown: 0
+  ShiftManaCost: 0
   ShiftHold: 0
+  HeavySkill: {fileID: 0}
+  HeavyForce: 0
   ArmorType: 0
   Defence: 0
   Health: 0
@@ -199,10 +207,15 @@ MonoBehaviour:
   RightWallMount: {fileID: 0}
   BackgroundMount: {fileID: 0}
   CeilingMount: {fileID: 0}
+  Consumable: 0
   Grabable: 1
+  HurtAll: 0
   ItemNum: 1
   Held: 0
-  speed: 70
+  LeftHand: 1
+  HandS: {fileID: 0}
+  speed: 10
+  PlayerS: {fileID: 0}
   OnHitParts: {fileID: 9200550551713125502}
 --- !u!114 &324017860351015999
 MonoBehaviour:
